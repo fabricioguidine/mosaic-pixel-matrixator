@@ -190,20 +190,40 @@ def main():
         output_dir = Path("output")
         output_dir.mkdir(parents=True, exist_ok=True)
         
+        # Calculate paint color inventory
+        from src.quantization.paint_colors import PaintColorInventory
+        paint_inventory = PaintColorInventory.from_matrix(matrix)
+        required_paints = paint_inventory.get_required_paints()
+        
         # Save as text file
         txt_output = output_dir / f"{input_name}-{timestamp}_matrix.txt"
-        save_matrix_to_file(matrix, txt_output)
+        save_matrix_to_file(matrix, str(txt_output))
         print(f"\nMatrix saved to: {txt_output}")
         
         # Save as JSON file
         json_output = output_dir / f"{input_name}-{timestamp}_matrix.json"
-        save_matrix_to_json(matrix, json_output)
+        save_matrix_to_json(matrix, str(json_output))
         print(f"Matrix saved to: {json_output}")
+        
+        # Save paint color requirements
+        paints_output = output_dir / f"{input_name}-{timestamp}_paints.json"
+        paint_data = {
+            "total_unique_colors": paint_inventory.get_unique_colors_count(),
+            "total_tiles": paint_inventory.get_total_tiles(),
+            "required_paints": required_paints
+        }
+        with open(paints_output, 'w') as f:
+            json.dump(paint_data, f, indent=2)
+        print(f"Paint colors saved to: {paints_output}")
         
         # Recreate image from matrix for visualization
         preview_output = output_dir / f"{input_name}-{timestamp}.png"
-        recreate_image_from_matrix(matrix, preview_output, scale_factor=10)
+        recreate_image_from_matrix(matrix, str(preview_output), scale_factor=10)
         print(f"Preview image saved to: {preview_output}")
+        
+        print(f"\nPaint Requirements:")
+        print(f"  Total unique colors needed: {paint_inventory.get_unique_colors_count()}")
+        print(f"  Total tiles: {paint_inventory.get_total_tiles()}")
         
         print("\nProcessing completed successfully!")
         

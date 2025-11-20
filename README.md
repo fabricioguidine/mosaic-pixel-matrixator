@@ -7,9 +7,10 @@ A Python tool to convert images into ceramic tile color matrices. This project t
 - **Image Processing**: Supports common image formats (JPG, PNG, BMP, GIF, TIFF, WEBP)
 - **Aspect Ratio Preservation**: Automatically maintains image proportions to prevent distortion
 - **Custom Dimensions**: Specify maximum output dimensions in centimeters (dimensions are adjusted to preserve aspect ratio)
-- **Color Quantization**: Maps colors to the closest palette color for easy-to-obtain ceramic tile colors
-- **Color Naming**: Automatically assigns color names (e.g., green, light-green, dark-green) to RGB values
-- **Color Matrix Generation**: Converts images into matrices of RGB values with color names
+- **Color Quantization**: Uses median cut algorithm for better image quality
+- **Primary Color Mix**: Shows which three primary colors (Red, Green, Blue) mix to create each color
+- **Paint Color Inventory**: Lists all required paint colors with usage counts
+- **Color Matrix Generation**: Converts images into matrices of RGB values with primary color mix information
 - **Multiple Output Formats**: Saves matrices as both human-readable text files and JSON
 - **Preview Generation**: Automatically generates a preview image showing how the tile mosaic will look
 - **Timestamp-based Output**: Output files include timestamps to prevent overwrites
@@ -81,8 +82,9 @@ pip install -r requirements.txt
 
 3. **Find the results** in the `output/` folder:
    - `{image_name}-{timestamp}.png` - Visual preview of the tile mosaic
-   - `{image_name}-{timestamp}_matrix.txt` - Human-readable RGB matrix
-   - `{image_name}-{timestamp}_matrix.json` - JSON format for programmatic use
+   - `{image_name}-{timestamp}_matrix.txt` - Human-readable RGB matrix with mix info
+   - `{image_name}-{timestamp}_matrix.json` - JSON format with RGB and mix percentages
+   - `{image_name}-{timestamp}_paints.json` - List of required paint colors with usage counts
 
 ### Detailed Example
 
@@ -126,11 +128,11 @@ Below is a visual example showing the transformation from input image to ceramic
 
 *Original artwork that will be converted to a ceramic tile mosaic*
 
-### Processed Output (with Color Quantization)
+### Processed Output (with Color Quantization and Paint Inventory)
 
 ![Output Example](examples/images/output-example.png)
 
-*Preview of the tile mosaic with color quantization applied - colors are mapped to the closest palette colors for easy tile painting*
+*Preview of the tile mosaic with median cut color quantization - optimized palette for better image quality*
 
 These examples demonstrate how the tool:
 - Preserves the original image's aspect ratio
@@ -147,19 +149,19 @@ These examples demonstrate how the tool:
 3. **Dimension Calculation**: Chooses closest match to requested dimensions
 4. **Matrix Size Calculation**: Calculates tiles needed (dimensions ÷ tile size)
 5. **Image Resizing**: Resizes to matrix dimensions
-6. **Color Quantization**: Maps colors to closest palette color (optional)
-7. **Color Naming**: Assigns color names (green, light-green, dark-green, etc.)
-8. **Matrix Generation**: Creates RGB matrix with color names
+6. **Color Quantization**: Uses median cut algorithm to create optimized palette
+7. **Primary Color Mix**: Calculates Red, Green, Blue mix percentages for each color
+8. **Matrix Generation**: Creates RGB matrix with primary color mix information
 9. **File Output**: Saves matrix in TXT and JSON formats
 10. **Preview Generation**: Creates visual preview image
 
 ### Key Rules
 
 - **Aspect Ratio**: Always preserved (no distortion)
-- **Closest Match**: Dimensions and colors use closest match algorithm
-- **Color Naming**: Follows pattern base-color, light-base-color, dark-base-color
+- **Closest Match**: Dimensions use closest match algorithm
+- **Primary Color Mix**: Each color shows R%, G%, B% percentages for mixing
 - **Tile Size**: Default 2.2cm, customizable via `--tile-size`
-- **Color Quantization**: Default 32 colors, customizable via `--num-colors`
+- **Color Quantization**: Default 64 colors using median cut, customizable via `--num-colors`
 
 ### Color Naming System
 
@@ -189,24 +191,24 @@ Example: A light green (200, 230, 200) closer to white will be named "light-gree
 A visual representation of how the ceramic tile mosaic will look. The image is upscaled 10x for better visibility while maintaining the pixelated tile effect.
 
 ### Text Matrix (`{name}-{timestamp}_matrix.txt`)
-Human-readable format with RGB values and color names:
+Human-readable format with RGB values and primary color mix:
 
 ```
 # RGB Color Matrix
 # Matrix dimensions: 56 rows x 100 columns
-# Format: R,G,B[color-name] for each tile
+# Format: R,G,B[R:red%,G:green%,B:blue%] - Mix of three primary colors
 
 # Row 1
-109,73,77[dark-gray] 111,76,80[gray] 114,78,82[gray] ...
+109,73,77[R:42.7%,G:28.6%,B:30.2%] 111,76,80[R:43.5%,G:29.8%,B:31.4%] ...
 # Row 2
-107,73,77[dark-gray] 109,76,79[gray] 112,78,82[gray] ...
+107,73,77[R:42.0%,G:28.6%,B:30.2%] 109,76,79[R:42.7%,G:29.8%,B:31.0%] ...
 ...
 ```
 
-Color names follow the pattern: `base-color`, `light-base-color`, `dark-base-color` (e.g., green, light-green, dark-green)
+Each color shows the percentage of Red, Green, and Blue primaries needed to mix that color.
 
 ### JSON Matrix (`{name}-{timestamp}_matrix.json`)
-Structured format with RGB and color names:
+Structured format with RGB and primary color mix:
 
 ```json
 {
@@ -218,11 +220,21 @@ Structured format with RGB and color names:
     [
       {
         "rgb": [109, 73, 77],
-        "color_name": "dark-gray"
+        "red": 109,
+        "green": 73,
+        "blue": 77,
+        "red_pct": 42.7,
+        "green_pct": 28.6,
+        "blue_pct": 30.2
       },
       {
         "rgb": [111, 76, 80],
-        "color_name": "gray"
+        "red": 111,
+        "green": 76,
+        "blue": 80,
+        "red_pct": 43.5,
+        "green_pct": 29.8,
+        "blue_pct": 31.4
       },
       ...
     ],
@@ -230,6 +242,44 @@ Structured format with RGB and color names:
   ]
 }
 ```
+
+Each entry shows RGB values and the percentage of each primary color (Red, Green, Blue) needed to mix that color.
+
+### Paint Colors List (`{name}-{timestamp}_paints.json`)
+
+List of all unique paint colors needed with usage counts:
+
+```json
+{
+  "total_unique_colors": 64,
+  "total_tiles": 2924,
+  "required_paints": [
+    {
+      "rgb": [255, 255, 255],
+      "red": 255,
+      "green": 255,
+      "blue": 255,
+      "count": 245,
+      "red_pct": 100.0,
+      "green_pct": 100.0,
+      "blue_pct": 100.0
+    },
+    {
+      "rgb": [200, 150, 100],
+      "red": 200,
+      "green": 150,
+      "blue": 100,
+      "count": 180,
+      "red_pct": 78.4,
+      "green_pct": 58.8,
+      "blue_pct": 39.2
+    },
+    ...
+  ]
+}
+```
+
+Colors are sorted by usage count (most used first). This tells you exactly which paint colors to buy and in what quantities.
 
 ## Architecture
 
@@ -252,7 +302,7 @@ Options:
   --width       Maximum output width in centimeters
   --height      Maximum output height in centimeters
   --tile-size   Tile size in centimeters (default: 2.2cm)
-  --num-colors  Number of colors in palette for quantization (default: 32)
+  --num-colors  Number of colors in palette for quantization (default: 64)
   --no-quantize Disable color quantization (use original image colors)
 
 If no arguments provided, the script will prompt for dimensions and tile size interactively.
