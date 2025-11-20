@@ -51,7 +51,10 @@ class TestFileHandler(unittest.TestCase):
         self.assertEqual(data['dimensions']['columns'], 2)
         self.assertEqual(len(data['matrix']), 2)
         self.assertEqual(len(data['matrix'][0]), 2)
-        self.assertEqual(data['matrix'][0][0], [255, 128, 64])
+        # Updated format includes primary mix info
+        self.assertIn('rgb', data['matrix'][0][0])
+        self.assertIn('red', data['matrix'][0][0])
+        self.assertEqual(data['matrix'][0][0]['rgb'], [255, 128, 64])
     
     def test_save_matrix_creates_directory(self):
         """Test that save functions create directories if they don't exist."""
