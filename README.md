@@ -103,7 +103,7 @@ python main.py --width 200 --height 150
 # Output:
 # Original image: 1920x1080 (aspect ratio: 1.78)
 # Requested dimensions: 200cm x 150cm
-# Tile size: 2.00cm x 2.00cm
+# Tile size: 2.20cm x 2.20cm (default)
 # Output dimensions: 200.00cm x 112.36cm
 # 
 # Dimension adjustments (to preserve aspect ratio 1.78):
