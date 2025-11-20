@@ -1,17 +1,13 @@
 # Architecture Documentation
 
-This document describes the architecture, design decisions, and internal structure of the Mosaic Pixel Matrixator project.
-
-## Overview
-
-The project follows a modular architecture with clear separation of concerns. Each module has a specific responsibility, making the codebase maintainable, testable, and extensible.
+Clean architecture with modular design and separation of concerns.
 
 ## Architecture Principles
 
-1. **Separation of Concerns**: Each module handles a single responsibility
-2. **Modularity**: Components can be used independently or together
-3. **Configurability**: Constants are centralized for easy modification
-4. **Extensibility**: New features can be added without modifying existing code
+1. **Separation of Concerns**: Each module has a single responsibility
+2. **Modularity**: Components are independent and reusable
+3. **Clean Architecture**: Clear dependency flow (config → io → processing → generation → quantization)
+4. **Testability**: Pure functions and isolated components
 
 ## Module Structure
 

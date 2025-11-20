@@ -1,6 +1,7 @@
 """Main entry point for Mosaic Pixel Matrixator."""
 
 import sys
+import json
 import argparse
 from pathlib import Path
 from datetime import datetime
