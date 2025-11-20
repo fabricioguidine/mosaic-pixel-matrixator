@@ -1,7 +1,7 @@
 """Matrix generation and dimension calculations."""
 
 import numpy as np
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Optional
 from PIL import Image
 from src.config.constants import TILE_SIZE_CM
 from src.processing.image_processor import ImageProcessor
@@ -88,7 +88,9 @@ class MatrixGenerator:
         image: Image.Image, 
         output_width_cm: float, 
         output_height_cm: float,
-        preserve_aspect_ratio: bool = True
+        preserve_aspect_ratio: bool = True,
+        quantize_colors: bool = True,
+        num_colors: Optional[int] = None
     ) -> Tuple[np.ndarray, Tuple[int, int], Tuple[float, float], Tuple[float, float]]:
         """
         Generate a color matrix from an image.
@@ -98,6 +100,8 @@ class MatrixGenerator:
             output_width_cm: Requested output width in centimeters
             output_height_cm: Requested output height in centimeters
             preserve_aspect_ratio: If True, maintain image aspect ratio (default: True)
+            quantize_colors: If True, reduce color palette to mixable colors (default: True)
+            num_colors: Number of colors in reduced palette (default: None, uses default from quantizer)
         
         Returns:
             Tuple of (color_matrix, (rows, cols), (actual_width_cm, actual_height_cm), (width_diff, height_diff))
@@ -119,6 +123,12 @@ class MatrixGenerator:
         
         # Convert image to matrix
         matrix = self.processor.image_to_array(image, rows, cols)
+        
+        # Quantize colors if requested
+        if quantize_colors:
+            from src.quantization.color_quantizer import ColorQuantizer
+            quantizer = ColorQuantizer(num_colors=num_colors or 32)
+            matrix = quantizer.quantize_matrix(matrix)
         
         return matrix, (rows, cols), (actual_width_cm, actual_height_cm), (width_diff, height_diff)
     

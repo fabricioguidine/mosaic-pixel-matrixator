@@ -86,6 +86,17 @@ def main():
         default=TILE_SIZE_CM,
         help=f'Tile size in centimeters (default: {TILE_SIZE_CM}cm)'
     )
+    parser.add_argument(
+        '--num-colors',
+        type=int,
+        default=32,
+        help='Number of colors in reduced palette for mixable tiles (default: 32)'
+    )
+    parser.add_argument(
+        '--no-quantize',
+        action='store_true',
+        help='Disable color quantization (use original colors)'
+    )
     args = parser.parse_args()
     
     # Validate tile size
@@ -146,7 +157,12 @@ def main():
         print(f"Tile size: {tile_size_cm:.2f}cm x {tile_size_cm:.2f}cm")
         
         matrix, (rows, cols), (actual_width_cm, actual_height_cm), (width_diff, height_diff) = generator.generate_matrix(
-            image, width_cm, height_cm, preserve_aspect_ratio=True
+            image, 
+            width_cm, 
+            height_cm, 
+            preserve_aspect_ratio=True,
+            quantize_colors=not args.no_quantize,
+            num_colors=args.num_colors
         )
         
         # Get matrix information
@@ -162,8 +178,8 @@ def main():
         # Always show adjustments if either dimension was changed to preserve aspect ratio
         if width_diff > 0.01 or height_diff > 0.01:
             print(f"\nDimension adjustments (to preserve aspect ratio {orig_aspect_ratio:.2f}):")
-            print(f"  Width:  {width_cm:.2f}cm requested → {actual_width_cm:.2f}cm actual (difference: {width_diff:+.2f}cm)")
-            print(f"  Height: {height_cm:.2f}cm requested → {actual_height_cm:.2f}cm actual (difference: {height_diff:+.2f}cm)")
+            print(f"  Width:  {width_cm:.2f}cm requested -> {actual_width_cm:.2f}cm actual (difference: {width_diff:+.2f}cm)")
+            print(f"  Height: {height_cm:.2f}cm requested -> {actual_height_cm:.2f}cm actual (difference: {height_diff:+.2f}cm)")
         else:
             # Only show this if both dimensions match exactly (rare case)
             print(f"\nDimensions match exactly (aspect ratio {orig_aspect_ratio:.2f} preserved naturally)")

@@ -7,6 +7,7 @@ A Python tool to convert images into ceramic tile color matrices. This project t
 - **Image Processing**: Supports common image formats (JPG, PNG, BMP, GIF, TIFF, WEBP)
 - **Aspect Ratio Preservation**: Automatically maintains image proportions to prevent distortion
 - **Custom Dimensions**: Specify maximum output dimensions in centimeters (dimensions are adjusted to preserve aspect ratio)
+- **Color Quantization**: Maps colors to the closest palette color for easy-to-obtain ceramic tile colors
 - **Color Matrix Generation**: Converts images into matrices of RGB values
 - **Multiple Output Formats**: Saves matrices as both human-readable text files and JSON
 - **Preview Generation**: Automatically generates a preview image showing how the tile mosaic will look
@@ -118,11 +119,11 @@ python main.py --width 200 --height 150
 
 ## Example Results
 
-Below is a visual example showing the transformation from input image to ceramic tile mosaic at different scales:
+Below is a visual example showing the transformation from input image to ceramic tile mosaic:
 
 ### Original Input Image
 
-![Input Image](examples/images/input-example.png)
+![Input Image](https://github.com/fabricioguidine/mosaic-pixel-matrixator/blob/main/examples/images/input-example.png?raw=true)
 
 **Artwork Attribution:**
 
@@ -134,23 +135,17 @@ Below is a visual example showing the transformation from input image to ceramic
 
 *Original artwork that will be converted to a ceramic tile mosaic*
 
-### Output at Smaller Scale
+### Processed Output (with Color Quantization)
 
-![Small Scale Output](examples/images/output-small-scale.png)
+![Output Example](examples/images/output-example.png)
 
-*Preview of the tile mosaic at smaller dimensions - showing finer detail*
-
-### Output at Larger Scale
-
-![Large Scale Output](examples/images/output-large-scale.png)
-
-*Preview of the tile mosaic at larger dimensions - showing pixelated tile effect more clearly*
+*Preview of the tile mosaic with color quantization applied - colors are mapped to the closest palette colors for easy tile painting*
 
 These examples demonstrate how the tool:
 - Preserves the original image's aspect ratio
-- Maintains color accuracy in RGB values
+- Quantizes colors to the closest palette colors (easy to obtain for ceramic tiles)
+- Maintains color accuracy in RGB values within the reduced palette
 - Shows the pixelated tile effect that will be visible in the final ceramic mosaic
-- Scales appropriately for different output sizes
 
 ## How It Works
 
@@ -187,17 +182,24 @@ These examples demonstrate how the tool:
    - Each pixel's RGB values are extracted (0-255 range)
    - These values represent the color that each ceramic tile should have
 
-7. **Matrix Generation**: 
+7. **Color Quantization (if enabled)**:
+   - Creates a palette of easily obtainable colors (evenly distributed in RGB space)
+   - Maps each pixel's color to the closest color in the palette
+   - Uses Euclidean distance in RGB space to find the closest match
+   - Example: A light green closer to white than green will be mapped to white
+   - This ensures colors are easy to obtain and mix for ceramic tiles
+
+8. **Matrix Generation**: 
    - RGB values are organized into a 2D matrix (array of arrays)
    - Format: `matrix[row][column] = [R, G, B]`
    - This matrix maps directly to the physical tile arrangement
 
-8. **File Output**: 
+9. **File Output**: 
    - Matrix saved as human-readable text file
    - Matrix saved as JSON for programmatic use
    - Both files include matrix dimensions and RGB values
 
-9. **Preview Generation**: 
+10. **Preview Generation**: 
    - A preview image is created from the matrix
    - Upscaled 10× for visibility (shows pixelated tile effect)
    - Allows you to see how the final ceramic mosaic will look
@@ -292,15 +294,27 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed technical documentation.
 ## Command-Line Options
 
 ```bash
-python main.py [--width WIDTH] [--height HEIGHT] [--tile-size TILE_SIZE]
+python main.py [--width WIDTH] [--height HEIGHT] [--tile-size TILE_SIZE] [--num-colors NUM_COLORS] [--no-quantize]
 
 Options:
-  --width      Maximum output width in centimeters
-  --height     Maximum output height in centimeters
-  --tile-size  Tile size in centimeters (default: 2.2cm)
+  --width       Maximum output width in centimeters
+  --height      Maximum output height in centimeters
+  --tile-size   Tile size in centimeters (default: 2.2cm)
+  --num-colors  Number of colors in palette for quantization (default: 32)
+  --no-quantize Disable color quantization (use original image colors)
 
 If no arguments provided, the script will prompt for dimensions and tile size interactively.
 ```
+
+### Color Quantization
+
+Color quantization maps each pixel's color to the closest color in a predefined palette. This ensures:
+- Colors are easy to obtain for ceramic tiles
+- Similar colors are grouped together (e.g., light green → white if closer)
+- Reduced color variations for easier tile painting
+- Configurable palette size (fewer colors = easier to obtain, more colors = more accuracy)
+
+The quantization uses **Euclidean distance** in RGB space to find the closest match, similar to how dimensions use closest match.
 
 ## Troubleshooting
 
