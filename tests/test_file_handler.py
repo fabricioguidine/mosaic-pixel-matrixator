@@ -26,16 +26,18 @@ class TestFileHandler(unittest.TestCase):
         shutil.rmtree(self.test_dir)
     
     def test_save_matrix_to_file(self):
-        """Test saving matrix to text file."""
+        """Test saving matrix to text file with mixing instructions."""
         output_path = Path(self.test_dir) / 'test_matrix.txt'
         save_matrix_to_file(self.test_matrix, str(output_path))
         
         self.assertTrue(output_path.exists())
         
         content = output_path.read_text()
-        self.assertIn('RGB Color Matrix', content)
+        self.assertIn('RGB Color Matrix with Paint Mixing Instructions', content)
         self.assertIn('2 rows x 2 columns', content)
         self.assertIn('255,128,64', content)
+        self.assertIn('BASE COLORS TO PURCHASE', content)
+        self.assertIn('Mix:', content)
     
     def test_save_matrix_to_json(self):
         """Test saving matrix to JSON file."""

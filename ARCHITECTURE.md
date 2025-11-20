@@ -258,13 +258,4 @@ Each module can be tested independently:
 3. **File I/O**: Sequential operations, could be parallelized for batch processing
 4. **Memory**: Large images are resized before conversion to reduce memory usage
 
-## Future Enhancements
-
-Potential improvements to the architecture:
-1. **Batch Processing**: Process multiple images in one run
-2. **Color Quantization**: Reduce color palette for ceramic tile availability
-3. **Configuration File**: External configuration for tile sizes and formats
-4. **Progress Bars**: For large image processing
-5. **Image Selection**: Allow user to choose which image to process
-6. **Custom Tile Sizes**: Support non-square tiles (rectangular)
 

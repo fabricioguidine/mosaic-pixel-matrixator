@@ -14,6 +14,8 @@ A Python tool that transforms images into ceramic tile mosaics by generating RGB
 - **📐 Aspect Ratio Preservation**: Automatically maintains image proportions
 - **🎨 High-Quality Quantization**: Median cut algorithm for optimized color reduction
 - **🎨 Industry-Standard Colors**: CMYK (paint/printing) and Hex codes for color matching
+- **🎨 Minimum Color Purchase**: Only 5 base colors needed (Cyan, Magenta, Yellow, Black, White)
+- **🎨 Paint Mixing Instructions**: Each pixel shows how to mix base colors to achieve the desired color
 - **📦 Paint Inventory**: Lists all required paint colors with usage counts
 - **📊 Multiple Outputs**: TXT, JSON matrices + PNG preview + paint inventory
 - **⚙️ Configurable**: Custom tile size and color palette options
@@ -106,8 +108,9 @@ python main.py --width 200 --height 150 --no-quantize
 - **Dimensions**: 68 rows × 43 columns (2,924 tiles total)
 - **Output Size**: 95.79cm × 150.00cm (aspect ratio preserved)
 - **Color Quantization**: Median cut algorithm (32 unique colors)
-- **Paint Colors**: All colors tracked with usage counts
-- **Mix Information**: Each tile shows R%, G%, B% percentages
+- **Base Colors to Purchase**: 5 (Cyan, Magenta, Yellow, Black, White)
+- **Mixing Instructions**: Each tile shows exact percentages to mix base colors
+- **Paint Inventory**: All colors tracked with CMYK, Hex, HSL and usage counts
 
 ## 🔧 How It Works
 
@@ -117,31 +120,42 @@ python main.py --width 200 --height 150 --no-quantize
 4. **Matrix Size Calculation**: Calculates tiles needed (dimensions ÷ tile size)
 5. **Image Resizing**: Resizes to matrix dimensions
 6. **Color Quantization**: Uses median cut algorithm to create optimized palette
-7. **Primary Color Mix**: Calculates Red, Green, Blue mix percentages
-8. **Paint Inventory**: Tracks all unique colors with usage counts
-9. **File Output**: Saves matrix in TXT and JSON formats
-10. **Preview Generation**: Creates visual preview image
+7. **Base Color Selection**: Identifies minimum colors to purchase (5 CMYK primaries + white)
+8. **Mixing Instructions**: Calculates how to mix base colors for each pixel
+9. **Paint Inventory**: Tracks all unique colors with usage counts
+10. **File Output**: Saves matrix in TXT and JSON formats with mixing instructions
+11. **Preview Generation**: Creates visual preview image
 
 ### Key Rules
 
 - **Aspect Ratio**: Always preserved (no distortion)
 - **Closest Match**: Dimensions use closest match algorithm
+- **Minimum Colors**: Only 5 base colors needed (CMYK + White) - all other colors can be mixed
 - **Industry Standards**: Each color shows CMYK (for paint mixing) and Hex (for reference)
+- **Mixing Instructions**: Each pixel shows exact percentages of base colors to mix
 - **Tile Size**: Default 2.2cm, customizable via `--tile-size`
-- **Color Quantization**: Default 64 colors using median cut
+- **Color Quantization**: Default 32 colors using median cut
 
 ## 📄 Output Formats
 
 ### Text Matrix (`{name}-{timestamp}_matrix.txt`)
 
+Includes base colors to purchase and mixing instructions for each pixel:
+
 ```
-# RGB Color Matrix
+# RGB Color Matrix with Paint Mixing Instructions
 # Matrix dimensions: 68 rows x 43 columns
-# Format: R,G,B[C:cyan%,M:magenta%,Y:yellow%,K:black%] #HEX
-# CMYK percentages for paint mixing (industry standard)
+# Format: R,G,B[CMYK] #HEX {mix_instruction}
+
+# BASE COLORS TO PURCHASE:
+# - CYAN: RGB[0, 255, 255] #00FFFF CMYK(100.0%,0.0%,0.0%,0.0%)
+# - MAGENTA: RGB[255, 0, 255] #FF00FF CMYK(0.0%,100.0%,0.0%,0.0%)
+# - YELLOW: RGB[255, 255, 0] #FFFF00 CMYK(0.0%,0.0%,100.0%,0.0%)
+# - BLACK: RGB[0, 0, 0] #000000 CMYK(0.0%,0.0%,0.0%,100.0%)
+# - WHITE: RGB[255, 255, 255] #FFFFFF CMYK(0.0%,0.0%,0.0%,0.0%)
 
 # Row 1
-109,73,77[C:0.0%,M:32.9%,Y:29.4%,K:57.3%] #6D494D 111,76,80[C:0.0%,M:31.5%,Y:27.9%,K:56.5%] #6F4C50 ...
+24,18,44[C:45.5%,M:59.1%,Y:0.0%,K:82.7%] #18122C {Mix: 24.3% cyan, 31.6% magenta, 44.2% black} ...
 ```
 
 ### JSON Matrix (`{name}-{timestamp}_matrix.json`)

@@ -193,12 +193,17 @@ def main():
         
         # Calculate paint color inventory
         from src.quantization.paint_colors import PaintColorInventory
+        from src.quantization.color_base_selector import ColorBaseSelector
+        
         paint_inventory = PaintColorInventory.from_matrix(matrix)
         required_paints = paint_inventory.get_required_paints()
         
-        # Save as text file
+        # Select base colors to purchase (minimum set)
+        base_colors = ColorBaseSelector.select_base_colors(matrix)
+        
+        # Save as text file with mixing instructions
         txt_output = output_dir / f"{input_name}-{timestamp}_matrix.txt"
-        save_matrix_to_file(matrix, str(txt_output))
+        save_matrix_to_file(matrix, str(txt_output), base_colors)
         print(f"\nMatrix saved to: {txt_output}")
         
         # Save as JSON file
@@ -223,8 +228,10 @@ def main():
         print(f"Preview image saved to: {preview_output}")
         
         print(f"\nPaint Requirements:")
-        print(f"  Total unique colors needed: {paint_inventory.get_unique_colors_count()}")
+        print(f"  Base colors to purchase: {len(base_colors)} (Cyan, Magenta, Yellow, Black, White)")
+        print(f"  Total unique colors in image: {paint_inventory.get_unique_colors_count()}")
         print(f"  Total tiles: {paint_inventory.get_total_tiles()}")
+        print(f"\nNote: All colors can be achieved by mixing the base CMYK colors.")
         
         print("\nProcessing completed successfully!")
         
