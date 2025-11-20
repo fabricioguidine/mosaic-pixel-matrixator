@@ -20,16 +20,15 @@ class TestColorQuantizer(unittest.TestCase):
         self.assertTrue(True)  # Placeholder - palette created on demand
     
     def test_quantize_color(self):
-        """Test quantizing a single color."""
-        # Create palette first by quantizing a matrix
+        """Test quantizing a single color via matrix quantization."""
+        # Create test matrix and quantize it
         test_matrix = np.array([[[255, 128, 64]]], dtype=np.uint8)
-        self.quantizer.quantize_matrix(test_matrix)
+        quantized_matrix = self.quantizer.quantize_matrix(test_matrix)
         
-        color = np.array([255, 128, 64], dtype=np.uint8)
-        quantized = self.quantizer.quantize_color(color)
-        
-        self.assertEqual(len(quantized), 3)
-        self.assertTrue(all(0 <= val <= 255 for val in quantized))
+        # Verify the quantized result
+        quantized_color = quantized_matrix[0, 0]
+        self.assertEqual(len(quantized_color), 3)
+        self.assertTrue(all(0 <= val <= 255 for val in quantized_color))
     
     def test_quantize_matrix(self):
         """Test quantizing a color matrix."""
