@@ -29,7 +29,7 @@ class TestPaintColorInventory(unittest.TestCase):
         self.assertEqual(self.inventory.get_total_tiles(), 3)
     
     def test_get_required_paints(self):
-        """Test getting required paints list."""
+        """Test getting required paints list with industry standards."""
         self.inventory.add_color(255, 0, 0)
         self.inventory.add_color(0, 255, 0)
         self.inventory.add_color(255, 0, 0)  # Duplicate
@@ -39,8 +39,10 @@ class TestPaintColorInventory(unittest.TestCase):
         self.assertEqual(len(paints), 2)
         self.assertEqual(paints[0]['count'], 2)  # Red is most used
         self.assertIn('rgb', paints[0])
+        self.assertIn('hex', paints[0])
+        self.assertIn('cmyk', paints[0])
+        self.assertIn('hsl', paints[0])
         self.assertIn('count', paints[0])
-        self.assertIn('red_pct', paints[0])
     
     def test_from_matrix(self):
         """Test creating inventory from matrix."""
