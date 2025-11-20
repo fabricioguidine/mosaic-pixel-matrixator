@@ -8,7 +8,8 @@ A Python tool to convert images into ceramic tile color matrices. This project t
 - **Aspect Ratio Preservation**: Automatically maintains image proportions to prevent distortion
 - **Custom Dimensions**: Specify maximum output dimensions in centimeters (dimensions are adjusted to preserve aspect ratio)
 - **Color Quantization**: Maps colors to the closest palette color for easy-to-obtain ceramic tile colors
-- **Color Matrix Generation**: Converts images into matrices of RGB values
+- **Color Naming**: Automatically assigns color names (e.g., green, light-green, dark-green) to RGB values
+- **Color Matrix Generation**: Converts images into matrices of RGB values with color names
 - **Multiple Output Formats**: Saves matrices as both human-readable text files and JSON
 - **Preview Generation**: Automatically generates a preview image showing how the tile mosaic will look
 - **Timestamp-based Output**: Output files include timestamps to prevent overwrites
@@ -50,18 +51,11 @@ mosaic-pixel-matrixator/
 
 ## Installation
 
-1. **Clone or download this repository**
-
-2. **Install the required dependencies:**
 ```bash
 pip install -r requirements.txt
 ```
 
-### Requirements
-
-- Python 3.8 or higher
-- Pillow (PIL) >= 10.0.0 - Image processing library
-- NumPy >= 1.24.0 - Matrix operations
+**Requirements**: Python 3.8+, Pillow >= 10.0.0, NumPy >= 1.24.0
 
 ## Usage
 
@@ -213,19 +207,16 @@ These examples demonstrate how the tool:
 - **Matrix Precision**: Matrix dimensions are calculated by dividing output size by tile size (integer division)
 - **Color Format**: Output uses RGB values (0-255) for maximum compatibility
 
-### Aspect Ratio Preservation
+### Color Naming System
 
-When you provide dimensions (e.g., 200cm x 150cm), the tool automatically:
-- Calculates the original image's aspect ratio
-- Evaluates both options: fitting to requested width or requested height
-- Chooses the option that is closest to your requested dimensions (minimizes total difference)
-- Ensures no distortion of the image
-- Displays the differences between requested and actual dimensions
+Colors are automatically named using ranges:
+- **Green variants**: green, light-green, dark-green
+- **Red variants**: red, light-red, dark-red  
+- **Blue variants**: blue, light-blue, dark-blue
+- **Neutrals**: white, light-gray, gray, dark-gray, black
+- **Other**: yellow, orange, purple, brown, pink, cyan
 
-For example, if your image is 16:9 and you request 200cm x 150cm:
-- Option 1: 200cm x 112.5cm (fits width, height difference: -37.5cm)
-- Option 2: 266.7cm x 150cm (fits height, width difference: +66.7cm)
-- The tool chooses Option 1 because it's closer to your request (total difference: 37.5cm vs 66.7cm)
+Example: A light green (200, 230, 200) closer to white will be named "light-green" or mapped appropriately.
 
 ## Tile Specifications
 
@@ -244,22 +235,24 @@ For example, if your image is 16:9 and you request 200cm x 150cm:
 A visual representation of how the ceramic tile mosaic will look. The image is upscaled 10x for better visibility while maintaining the pixelated tile effect.
 
 ### Text Matrix (`{name}-{timestamp}_matrix.txt`)
-Human-readable format with RGB values:
+Human-readable format with RGB values and color names:
 
 ```
 # RGB Color Matrix
 # Matrix dimensions: 56 rows x 100 columns
-# Format: R,G,B for each tile
+# Format: R,G,B[color-name] for each tile
 
 # Row 1
-109,73,77 111,76,80 114,78,82 ...
+109,73,77[dark-gray] 111,76,80[gray] 114,78,82[gray] ...
 # Row 2
-107,73,77 109,76,79 112,78,82 ...
+107,73,77[dark-gray] 109,76,79[gray] 112,78,82[gray] ...
 ...
 ```
 
+Color names follow the pattern: `base-color`, `light-base-color`, `dark-base-color` (e.g., green, light-green, dark-green)
+
 ### JSON Matrix (`{name}-{timestamp}_matrix.json`)
-Structured format for programmatic use:
+Structured format with RGB and color names:
 
 ```json
 {
@@ -269,9 +262,14 @@ Structured format for programmatic use:
   },
   "matrix": [
     [
-      [109, 73, 77],
-      [111, 76, 80],
-      [114, 78, 82],
+      {
+        "rgb": [109, 73, 77],
+        "color_name": "dark-gray"
+      },
+      {
+        "rgb": [111, 76, 80],
+        "color_name": "gray"
+      },
       ...
     ],
     ...
