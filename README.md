@@ -142,67 +142,24 @@ These examples demonstrate how the tool:
 
 ### Processing Pipeline
 
-1. **Image Loading**: 
-   - The tool loads the image from the `input/` folder
-   - Supports common formats: JPG, PNG, BMP, GIF, TIFF, WEBP
-   - Processes one image at a time (the first image found)
+1. **Image Loading**: Loads image from `input/` folder
+2. **Aspect Ratio Calculation**: Calculates and preserves aspect ratio
+3. **Dimension Calculation**: Chooses closest match to requested dimensions
+4. **Matrix Size Calculation**: Calculates tiles needed (dimensions ÷ tile size)
+5. **Image Resizing**: Resizes to matrix dimensions
+6. **Color Quantization**: Maps colors to closest palette color (optional)
+7. **Color Naming**: Assigns color names (green, light-green, dark-green, etc.)
+8. **Matrix Generation**: Creates RGB matrix with color names
+9. **File Output**: Saves matrix in TXT and JSON formats
+10. **Preview Generation**: Creates visual preview image
 
-2. **Aspect Ratio Calculation**: 
-   - Calculates the original image's aspect ratio (width / height)
-   - This ratio is preserved throughout the process to prevent distortion
+### Key Rules
 
-3. **Dimension Calculation (Closest Match Algorithm)**:
-   - You provide requested output dimensions (width × height in centimeters)
-   - The tool evaluates two options:
-     - **Option 1**: Fit to requested width (height calculated from aspect ratio)
-     - **Option 2**: Fit to requested height (width calculated from aspect ratio)
-   - Chooses the option with the smallest total difference from your request
-   - This ensures the output is as close as possible to what you requested
-
-4. **Matrix Size Calculation**: 
-   - Based on the final dimensions and tile size (default: 2.2cm × 2.2cm)
-   - Calculates how many tiles are needed: `rows = height / tile_size`, `columns = width / tile_size`
-   - Each tile in the matrix represents one ceramic tile position
-
-5. **Image Resizing**: 
-   - The original image is resized to match the matrix dimensions (rows × columns)
-   - Uses high-quality LANCZOS resampling for better color representation
-   - Each pixel in the resized image corresponds to one tile position
-
-6. **Color Extraction**: 
-   - Each pixel's RGB values are extracted (0-255 range)
-   - These values represent the color that each ceramic tile should have
-
-7. **Color Quantization (if enabled)**:
-   - Creates a palette of easily obtainable colors (evenly distributed in RGB space)
-   - Maps each pixel's color to the closest color in the palette
-   - Uses Euclidean distance in RGB space to find the closest match
-   - Example: A light green closer to white than green will be mapped to white
-   - This ensures colors are easy to obtain and mix for ceramic tiles
-
-8. **Matrix Generation**: 
-   - RGB values are organized into a 2D matrix (array of arrays)
-   - Format: `matrix[row][column] = [R, G, B]`
-   - This matrix maps directly to the physical tile arrangement
-
-9. **File Output**: 
-   - Matrix saved as human-readable text file
-   - Matrix saved as JSON for programmatic use
-   - Both files include matrix dimensions and RGB values
-
-10. **Preview Generation**: 
-   - A preview image is created from the matrix
-   - Upscaled 10× for visibility (shows pixelated tile effect)
-   - Allows you to see how the final ceramic mosaic will look
-
-### Key Rules and Constraints
-
-- **Tile Size**: Default is 2.2cm × 2.2cm, but can be customized via `--tile-size` parameter
-- **One Image at a Time**: The script processes the first image found in the `input/` folder
-- **Aspect Ratio Preservation**: The image aspect ratio is always maintained (no distortion)
-- **Closest Match**: The algorithm chooses dimensions closest to your request, even if it means exceeding one dimension
-- **Matrix Precision**: Matrix dimensions are calculated by dividing output size by tile size (integer division)
-- **Color Format**: Output uses RGB values (0-255) for maximum compatibility
+- **Aspect Ratio**: Always preserved (no distortion)
+- **Closest Match**: Dimensions and colors use closest match algorithm
+- **Color Naming**: Follows pattern base-color, light-base-color, dark-base-color
+- **Tile Size**: Default 2.2cm, customizable via `--tile-size`
+- **Color Quantization**: Default 32 colors, customizable via `--num-colors`
 
 ### Color Naming System
 
