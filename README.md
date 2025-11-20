@@ -134,12 +134,6 @@ Below is a visual example showing the transformation from input image to ceramic
 
 *Preview of the tile mosaic with median cut color quantization - optimized palette for better image quality*
 
-This example demonstrates:
-- **Aspect Ratio Preservation**: No distortion (68 rows × 43 columns = 2,924 tiles)
-- **Median Cut Quantization**: High-quality color reduction using optimized algorithm
-- **Primary Color Mix**: Each color shows R%, G%, B% percentages for paint mixing
-- **Paint Inventory**: Lists all required paint colors with usage counts
-- **Pixelated Effect**: Shows how the final ceramic tile mosaic will look
 
 ## How It Works
 
