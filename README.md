@@ -103,8 +103,12 @@ python main.py --width 200 --height 150
 # Output:
 # Original image: 1920x1080 (aspect ratio: 1.78)
 # Requested dimensions: 200cm x 150cm
+# Tile size: 2.00cm x 2.00cm
 # Output dimensions: 200.00cm x 112.36cm
-# Note: Dimensions adjusted to preserve aspect ratio (maintained at 1.78)
+# 
+# Dimension adjustments (to preserve aspect ratio 1.78):
+#   Width:  200.00cm (exact match)
+#   Height: 150.00cm requested → 112.36cm actual (difference: -37.64cm)
 #
 # 3. Files generated in output/:
 #    - landscape-20250115_143052.png (preview)
@@ -164,11 +168,15 @@ These examples demonstrate how the tool:
 
 When you provide dimensions (e.g., 200cm x 150cm), the tool automatically:
 - Calculates the original image's aspect ratio
-- Adjusts dimensions to fit within your specified bounds while maintaining the aspect ratio
+- Evaluates both options: fitting to requested width or requested height
+- Chooses the option that is closest to your requested dimensions (minimizes total difference)
 - Ensures no distortion of the image
+- Displays the differences between requested and actual dimensions
 
 For example, if your image is 16:9 and you request 200cm x 150cm:
-- The tool will adjust to approximately 200cm x 112.5cm to maintain the 16:9 ratio
+- Option 1: 200cm x 112.5cm (fits width, height difference: -37.5cm)
+- Option 2: 266.7cm x 150cm (fits height, width difference: +66.7cm)
+- The tool chooses Option 1 because it's closer to your request (total difference: 37.5cm vs 66.7cm)
 
 ## Tile Specifications
 

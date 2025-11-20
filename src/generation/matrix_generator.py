@@ -43,58 +43,45 @@ class MatrixGenerator:
     def calculate_dimensions_preserving_aspect_ratio(
         self,
         image: Image.Image,
-        max_width_cm: float,
-        max_height_cm: float
-    ) -> Tuple[float, float]:
+        requested_width_cm: float,
+        requested_height_cm: float
+    ) -> Tuple[float, float, float, float]:
         """
         Calculate output dimensions that preserve image aspect ratio.
-        The dimensions will fit within the specified maximum bounds.
+        Chooses the option that is closest to the requested dimensions.
         
         Args:
             image: Input PIL Image
-            max_width_cm: Maximum allowed width in centimeters
-            max_height_cm: Maximum allowed height in centimeters
+            requested_width_cm: Requested width in centimeters
+            requested_height_cm: Requested height in centimeters
         
         Returns:
-            Tuple of (actual_width_cm, actual_height_cm) that preserves aspect ratio
+            Tuple of (actual_width_cm, actual_height_cm, width_diff, height_diff)
+            where width_diff and height_diff are the differences from requested values
         """
         # Get original image dimensions
         orig_width, orig_height = image.size
         orig_aspect_ratio = orig_width / orig_height
         
-        # Calculate what dimensions would be if we fit to width
-        width_fit_height = max_width_cm / orig_aspect_ratio
-        width_fits = width_fit_height <= max_height_cm
+        # Calculate option 1: Fit to requested width
+        option1_width = requested_width_cm
+        option1_height = requested_width_cm / orig_aspect_ratio
+        option1_width_diff = abs(option1_width - requested_width_cm)  # Should be 0
+        option1_height_diff = abs(option1_height - requested_height_cm)
+        option1_total_diff = option1_width_diff + option1_height_diff
         
-        # Calculate what dimensions would be if we fit to height
-        height_fit_width = max_height_cm * orig_aspect_ratio
-        height_fits = height_fit_width <= max_width_cm
+        # Calculate option 2: Fit to requested height
+        option2_width = requested_height_cm * orig_aspect_ratio
+        option2_height = requested_height_cm
+        option2_width_diff = abs(option2_width - requested_width_cm)
+        option2_height_diff = abs(option2_height - requested_height_cm)  # Should be 0
+        option2_total_diff = option2_width_diff + option2_height_diff
         
-        # Choose the best fit (prefer fitting to the constraint that results in larger size)
-        if width_fits and height_fits:
-            # Both fit, choose the one that uses more space
-            if width_fit_height > max_height_cm * 0.95:
-                # Width fit is close to max height, use it
-                return max_width_cm, width_fit_height
-            else:
-                # Height fit uses more space
-                return height_fit_width, max_height_cm
-        elif width_fits:
-            # Only width fits
-            return max_width_cm, width_fit_height
-        elif height_fits:
-            # Only height fits
-            return height_fit_width, max_height_cm
+        # Choose the option with the smallest total difference
+        if option1_total_diff <= option2_total_diff:
+            return option1_width, option1_height, option1_width_diff, option1_height_diff
         else:
-            # This shouldn't happen, but if it does, fit to the smaller constraint
-            # Calculate scale factors for both dimensions
-            width_scale = max_width_cm / orig_aspect_ratio / max_height_cm
-            height_scale = max_height_cm * orig_aspect_ratio / max_width_cm
-            
-            if width_scale < height_scale:
-                return max_width_cm, max_width_cm / orig_aspect_ratio
-            else:
-                return max_height_cm * orig_aspect_ratio, max_height_cm
+            return option2_width, option2_height, option2_width_diff, option2_height_diff
     
     def generate_matrix(
         self, 
@@ -102,28 +89,30 @@ class MatrixGenerator:
         output_width_cm: float, 
         output_height_cm: float,
         preserve_aspect_ratio: bool = True
-    ) -> Tuple[np.ndarray, Tuple[int, int], Tuple[float, float]]:
+    ) -> Tuple[np.ndarray, Tuple[int, int], Tuple[float, float], Tuple[float, float]]:
         """
         Generate a color matrix from an image.
         
         Args:
             image: Input PIL Image
-            output_width_cm: Desired output width in centimeters (max if preserve_aspect_ratio=True)
-            output_height_cm: Desired output height in centimeters (max if preserve_aspect_ratio=True)
+            output_width_cm: Requested output width in centimeters
+            output_height_cm: Requested output height in centimeters
             preserve_aspect_ratio: If True, maintain image aspect ratio (default: True)
         
         Returns:
-            Tuple of (color_matrix, (rows, cols), (actual_width_cm, actual_height_cm))
+            Tuple of (color_matrix, (rows, cols), (actual_width_cm, actual_height_cm), (width_diff, height_diff))
         """
         if preserve_aspect_ratio:
-            # Calculate dimensions that preserve aspect ratio
-            actual_width_cm, actual_height_cm = self.calculate_dimensions_preserving_aspect_ratio(
+            # Calculate dimensions that preserve aspect ratio and are closest to requested
+            actual_width_cm, actual_height_cm, width_diff, height_diff = self.calculate_dimensions_preserving_aspect_ratio(
                 image, output_width_cm, output_height_cm
             )
         else:
             # Use exact dimensions (may distort image)
             actual_width_cm = output_width_cm
             actual_height_cm = output_height_cm
+            width_diff = 0.0
+            height_diff = 0.0
         
         # Calculate matrix dimensions
         rows, cols = self.calculate_matrix_dimensions(actual_width_cm, actual_height_cm)
@@ -131,7 +120,7 @@ class MatrixGenerator:
         # Convert image to matrix
         matrix = self.processor.image_to_array(image, rows, cols)
         
-        return matrix, (rows, cols), (actual_width_cm, actual_height_cm)
+        return matrix, (rows, cols), (actual_width_cm, actual_height_cm), (width_diff, height_diff)
     
     def get_matrix_info(self, matrix: np.ndarray) -> Dict:
         """

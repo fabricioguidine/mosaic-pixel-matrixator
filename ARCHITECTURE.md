@@ -76,10 +76,14 @@ from src.config import TILE_SIZE_CM, SUPPORTED_IMAGE_FORMATS
   - `generate_matrix(image, width_cm, height_cm, preserve_aspect_ratio=True)`: Main matrix generation method
   - `get_matrix_info(matrix)`: Extracts information about the generated matrix
 
-**Key Algorithm**: Aspect ratio preservation
+**Key Algorithm**: Aspect ratio preservation with closest match
 - Calculates original image aspect ratio
-- Determines best fit within maximum bounds while maintaining ratio
-- Chooses the fit that uses the most available space
+- Evaluates two options:
+  1. Fit to requested width (calculate height from aspect ratio)
+  2. Fit to requested height (calculate width from aspect ratio)
+- Calculates total difference for each option: |width_diff| + |height_diff|
+- Chooses the option with the smallest total difference
+- This ensures the output is as close as possible to requested dimensions
 
 **Design Decision**: Aspect ratio preservation prevents image distortion, which is critical for accurate tile representation.
 
@@ -136,27 +140,32 @@ Output Files (output/)
 
 ## Aspect Ratio Preservation Algorithm
 
-The core algorithm ensures images are not distorted:
+The core algorithm ensures images are not distorted while choosing dimensions closest to the request:
 
 1. **Calculate Original Aspect Ratio**:
    ```python
    aspect_ratio = original_width / original_height
    ```
 
-2. **Try Fitting to Width**:
+2. **Calculate Option 1 (Fit to Requested Width)**:
    ```python
-   if_fit_to_width = max_width / aspect_ratio <= max_height
+   option1_width = requested_width
+   option1_height = requested_width / aspect_ratio
+   option1_total_diff = |option1_width - requested_width| + |option1_height - requested_height|
    ```
 
-3. **Try Fitting to Height**:
+3. **Calculate Option 2 (Fit to Requested Height)**:
    ```python
-   if_fit_to_height = max_height * aspect_ratio <= max_width
+   option2_width = requested_height * aspect_ratio
+   option2_height = requested_height
+   option2_total_diff = |option2_width - requested_width| + |option2_height - requested_height|
    ```
 
-4. **Choose Best Fit**:
-   - If both fit: choose the one that uses more space
-   - If only one fits: use that dimension
-   - Select the dimension pair that maximizes usage within bounds
+4. **Choose Closest Match**:
+   - Compare total differences of both options
+   - Select the option with the smallest total difference
+   - This ensures the output dimensions are as close as possible to what was requested
+   - Display differences to the user for transparency
 
 ## File Naming Convention
 

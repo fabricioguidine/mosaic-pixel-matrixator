@@ -145,7 +145,7 @@ def main():
         print(f"Requested dimensions: {width_cm}cm x {height_cm}cm")
         print(f"Tile size: {tile_size_cm:.2f}cm x {tile_size_cm:.2f}cm")
         
-        matrix, (rows, cols), (actual_width_cm, actual_height_cm) = generator.generate_matrix(
+        matrix, (rows, cols), (actual_width_cm, actual_height_cm), (width_diff, height_diff) = generator.generate_matrix(
             image, width_cm, height_cm, preserve_aspect_ratio=True
         )
         
@@ -158,9 +158,17 @@ def main():
         print(f"Tile size: {info['tile_size_cm']:.2f}cm x {info['tile_size_cm']:.2f}cm")
         print(f"Output dimensions: {actual_width_cm:.2f}cm x {actual_height_cm:.2f}cm")
         
-        # Show if dimensions were adjusted
-        if abs(actual_width_cm - width_cm) > 0.01 or abs(actual_height_cm - height_cm) > 0.01:
-            print(f"Note: Dimensions adjusted to preserve aspect ratio (maintained at {orig_aspect_ratio:.2f})")
+        # Show dimension differences
+        if width_diff > 0.01 or height_diff > 0.01:
+            print(f"\nDimension adjustments (to preserve aspect ratio {orig_aspect_ratio:.2f}):")
+            if width_diff > 0.01:
+                print(f"  Width:  {width_cm:.2f}cm requested → {actual_width_cm:.2f}cm actual (difference: {width_diff:+.2f}cm)")
+            else:
+                print(f"  Width:  {width_cm:.2f}cm (exact match)")
+            if height_diff > 0.01:
+                print(f"  Height: {height_cm:.2f}cm requested → {actual_height_cm:.2f}cm actual (difference: {height_diff:+.2f}cm)")
+            else:
+                print(f"  Height: {height_cm:.2f}cm (exact match)")
         
         # Generate output filenames with image name and timestamp
         input_name = Path(image_path).stem
