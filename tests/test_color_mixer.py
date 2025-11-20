@@ -12,22 +12,21 @@ class TestColorMixer(unittest.TestCase):
         mix = ColorMixer.get_primary_mix(200, 100, 50)
         
         self.assertEqual(mix['rgb'], [200, 100, 50])
-        self.assertEqual(mix['red'], 200)
-        self.assertEqual(mix['green'], 100)
-        self.assertEqual(mix['blue'], 50)
-        self.assertIn('red_pct', mix)
-        self.assertIn('green_pct', mix)
-        self.assertIn('blue_pct', mix)
+        self.assertIn('hex', mix)
+        self.assertIn('cmyk', mix)
+        self.assertIn('hsl', mix)
+        self.assertEqual(mix['hex'], '#C86432')
     
     def test_format_primary_mix_text(self):
-        """Test formatting primary mix as text."""
+        """Test formatting primary mix as text with CMYK."""
         formatted = ColorMixer.format_primary_mix_text(200, 100, 50)
         
         self.assertIn('200,100,50', formatted)
-        self.assertIn('R:', formatted)
-        self.assertIn('G:', formatted)
-        self.assertIn('B:', formatted)
-        self.assertIn('%', formatted)
+        self.assertIn('C:', formatted)
+        self.assertIn('M:', formatted)
+        self.assertIn('Y:', formatted)
+        self.assertIn('K:', formatted)
+        self.assertIn('#', formatted)  # Hex code
     
     def test_format_primary_mix_compact(self):
         """Test compact formatting of primary mix."""
@@ -38,22 +37,24 @@ class TestColorMixer(unittest.TestCase):
         self.assertIn('G:100', formatted)
         self.assertIn('B:50', formatted)
     
-    def test_primary_mix_percentages(self):
-        """Test that percentages are calculated correctly."""
-        mix = ColorMixer.get_primary_mix(255, 128, 0)
+    def test_primary_mix_cmyk(self):
+        """Test that CMYK values are calculated correctly."""
+        mix = ColorMixer.get_primary_mix(255, 255, 255)  # White
         
-        # White should be 100%
-        self.assertAlmostEqual(mix['red_pct'], 100.0, places=1)
-        self.assertAlmostEqual(mix['green_pct'], 50.2, places=1)
-        self.assertAlmostEqual(mix['blue_pct'], 0.0, places=1)
+        # White should have all CMYK at 0%
+        self.assertEqual(mix['cmyk']['c'], 0.0)
+        self.assertEqual(mix['cmyk']['m'], 0.0)
+        self.assertEqual(mix['cmyk']['y'], 0.0)
+        self.assertEqual(mix['cmyk']['k'], 0.0)
     
     def test_primary_mix_clamping(self):
-        """Test that values are clamped to valid range."""
+        """Test that RGB values are clamped to valid range."""
         mix = ColorMixer.get_primary_mix(300, -10, 128)
         
-        self.assertEqual(mix['red'], 255)
-        self.assertEqual(mix['green'], 0)
-        self.assertEqual(mix['blue'], 128)
+        # Values should be clamped to 0-255
+        self.assertEqual(mix['rgb'][0], 255)
+        self.assertEqual(mix['rgb'][1], 0)
+        self.assertEqual(mix['rgb'][2], 128)
 
 
 if __name__ == '__main__':

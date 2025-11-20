@@ -6,11 +6,6 @@ from .color_converter import ColorConverter
 class ColorMixer:
     """Represents RGB colors with industry-standard color systems for paint purchasing."""
     
-    # Primary colors in RGB space
-    PRIMARY_RED = np.array([255, 0, 0], dtype=np.uint8)
-    PRIMARY_GREEN = np.array([0, 255, 0], dtype=np.uint8)
-    PRIMARY_BLUE = np.array([0, 0, 255], dtype=np.uint8)
-    
     @classmethod
     def get_primary_mix(cls, r: int, g: int, b: int) -> dict:
         """

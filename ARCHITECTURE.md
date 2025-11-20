@@ -19,7 +19,7 @@ Clean architecture with modular design and separation of concerns.
 - `constants.py`: Contains all configuration constants
 
 **Key Constants**:
-- `TILE_SIZE_CM`: Default ceramic tile size (2.0cm)
+- `TILE_SIZE_CM`: Default ceramic tile size (2.2cm)
 - `SUPPORTED_IMAGE_FORMATS`: Set of supported image file extensions
 
 **Usage**:
@@ -94,7 +94,41 @@ from src.config import TILE_SIZE_CM, SUPPORTED_IMAGE_FORMATS
 
 **Design Decision**: Uses NEAREST resampling for upscaling to maintain the pixelated tile effect. Default 10x scale makes small matrices visible.
 
-### 6. Main Entry Point (`main.py`)
+### 6. Color Quantization (`src/quantization/`)
+
+**Purpose**: Color reduction and industry-standard color system support
+
+#### `color_quantizer.py`
+- **Responsibility**: Median cut color quantization
+- **Class**: `ColorQuantizer`
+- **Methods**:
+  - `quantize_matrix(matrix)`: Reduces color palette using median cut algorithm
+
+#### `color_converter.py`
+- **Responsibility**: Industry-standard color system conversions
+- **Class**: `ColorConverter`
+- **Methods**:
+  - `rgb_to_hex(r, g, b)`: Converts to hexadecimal code
+  - `rgb_to_cmyk(r, g, b)`: Converts to CMYK (paint/printing standard)
+  - `rgb_to_hsl(r, g, b)`: Converts to HSL color space
+  - `get_industry_standards(r, g, b)`: Returns all color systems
+
+#### `color_mixer.py`
+- **Responsibility**: Formatting color information for output
+- **Class**: `ColorMixer`
+- **Methods**:
+  - `get_primary_mix(r, g, b)`: Returns industry-standard color information
+  - `format_primary_mix_text(r, g, b)`: Formats CMYK and Hex for text output
+
+#### `paint_colors.py`
+- **Responsibility**: Paint color inventory management
+- **Class**: `PaintColorInventory`
+- **Methods**:
+  - `get_required_paints()`: Returns all unique colors with usage counts and CMYK/Hex
+
+**Design Decision**: Uses CMYK (industry standard for paint/printing) and Hex codes for universal color reference. This allows users to purchase paints using standard color codes.
+
+### 7. Main Entry Point (`main.py`)
 
 **Purpose**: Command-line interface and orchestration
 
@@ -110,8 +144,10 @@ from src.config import TILE_SIZE_CM, SUPPORTED_IMAGE_FORMATS
 3. Get dimensions (CLI args or user input)
 4. Initialize MatrixGenerator
 5. Generate matrix (with aspect ratio preservation)
-6. Save outputs (TXT, JSON, PNG)
-7. Display results
+6. Apply color quantization (median cut)
+7. Calculate paint inventory (CMYK/Hex codes)
+8. Save outputs (TXT, JSON, PNG, paints.json)
+9. Display results
 
 ## Data Flow
 
@@ -128,6 +164,11 @@ Input Image (input/)
     ↓
 [matrix_generator.py] Generate RGB Matrix
     ↓
+[color_quantizer.py] Apply Median Cut Quantization
+    ↓
+[color_converter.py] Convert to CMYK/Hex (industry standards)
+    ↓
+[paint_colors.py] Calculate Paint Inventory
 [file_handler.py] Save Matrix (TXT, JSON)
 [image_recreator.py] Generate Preview (PNG)
     ↓
