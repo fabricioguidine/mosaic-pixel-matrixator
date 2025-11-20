@@ -81,6 +81,11 @@ pip install -r requirements.txt
    ```bash
    python main.py --width 200 --height 150
    ```
+   
+   **With custom tile size:**
+   ```bash
+   python main.py --width 200 --height 150 --tile-size 2.5
+   ```
 
 3. **Find the results** in the `output/` folder:
    - `{image_name}-{timestamp}.png` - Visual preview of the tile mosaic
@@ -167,7 +172,8 @@ For example, if your image is 16:9 and you request 200cm x 150cm:
 
 ## Tile Specifications
 
-- **Default tile size**: 2cm × 2cm (configurable in `src/config/constants.py`)
+- **Default tile size**: 2cm × 2cm (configurable via `--tile-size` parameter)
+- **Tile size options**: Can be specified via command line or interactive prompt
 - **Color format**: RGB (Red, Green, Blue) values from 0-255
 - **Matrix structure**: Array of arrays where each cell represents one tile
 
@@ -227,13 +233,14 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed technical documentation.
 ## Command-Line Options
 
 ```bash
-python main.py [--width WIDTH] [--height HEIGHT]
+python main.py [--width WIDTH] [--height HEIGHT] [--tile-size TILE_SIZE]
 
 Options:
-  --width   Maximum output width in centimeters
-  --height  Maximum output height in centimeters
+  --width      Maximum output width in centimeters
+  --height     Maximum output height in centimeters
+  --tile-size  Tile size in centimeters (default: 2.0cm)
 
-If no arguments provided, the script will prompt for dimensions interactively.
+If no arguments provided, the script will prompt for dimensions and tile size interactively.
 ```
 
 ## Troubleshooting

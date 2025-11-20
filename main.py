@@ -11,16 +11,21 @@ from src.visualization import recreate_image_from_matrix
 from src.config import TILE_SIZE_CM
 
 
-def get_user_input(width_cm: float = None, height_cm: float = None) -> tuple:
+def get_user_input(
+    width_cm: float = None, 
+    height_cm: float = None, 
+    tile_size_cm: float = None
+) -> tuple:
     """
-    Get user input for dimensions.
+    Get user input for dimensions and tile size.
     
     Args:
         width_cm: Optional width in centimeters (from command line)
         height_cm: Optional height in centimeters (from command line)
+        tile_size_cm: Optional tile size in centimeters (from command line)
     
     Returns:
-        Tuple of (width, height) in centimeters
+        Tuple of (width, height, tile_size) in centimeters
     """
     print("\n=== Mosaic Pixel Matrixator ===\n")
     
@@ -28,17 +33,28 @@ def get_user_input(width_cm: float = None, height_cm: float = None) -> tuple:
         if width_cm <= 0 or height_cm <= 0:
             print("Error: Dimensions must be positive numbers.")
             sys.exit(1)
-        return width_cm, height_cm
+        # Use provided tile size or default
+        tile_size = tile_size_cm if tile_size_cm is not None and tile_size_cm > 0 else TILE_SIZE_CM
+        return width_cm, height_cm, tile_size
     
     try:
         width = float(input("Enter output width in centimeters: "))
         height = float(input("Enter output height in centimeters: "))
+        tile_size_input = input(f"Enter tile size in centimeters (default: {TILE_SIZE_CM}cm): ").strip()
         
         if width <= 0 or height <= 0:
             print("Error: Dimensions must be positive numbers.")
             sys.exit(1)
         
-        return width, height
+        if tile_size_input:
+            tile_size = float(tile_size_input)
+            if tile_size <= 0:
+                print("Error: Tile size must be a positive number.")
+                sys.exit(1)
+        else:
+            tile_size = TILE_SIZE_CM
+        
+        return width, height, tile_size
     except ValueError:
         print("Error: Please enter valid numbers.")
         sys.exit(1)
@@ -64,7 +80,18 @@ def main():
     )
     parser.add_argument('--width', type=float, help='Output width in centimeters')
     parser.add_argument('--height', type=float, help='Output height in centimeters')
+    parser.add_argument(
+        '--tile-size', 
+        type=float, 
+        default=TILE_SIZE_CM,
+        help=f'Tile size in centimeters (default: {TILE_SIZE_CM}cm)'
+    )
     args = parser.parse_args()
+    
+    # Validate tile size
+    if args.tile_size <= 0:
+        print("Error: Tile size must be a positive number.")
+        sys.exit(1)
     
     # Check input directory
     input_dir = Path("input")
@@ -97,11 +124,15 @@ def main():
         print("Failed to load image.")
         return
     
-    # Get user input for dimensions
-    width_cm, height_cm = get_user_input(args.width, args.height)
+    # Get user input for dimensions and tile size
+    width_cm, height_cm, tile_size_cm = get_user_input(
+        args.width, 
+        args.height, 
+        args.tile_size
+    )
     
-    # Initialize matrix generator
-    generator = MatrixGenerator(tile_size_cm=TILE_SIZE_CM)
+    # Initialize matrix generator with specified tile size
+    generator = MatrixGenerator(tile_size_cm=tile_size_cm)
     
     print("\nProcessing image...")
     
@@ -112,6 +143,7 @@ def main():
         orig_aspect_ratio = orig_width / orig_height
         print(f"Original image: {orig_width}x{orig_height} (aspect ratio: {orig_aspect_ratio:.2f})")
         print(f"Requested dimensions: {width_cm}cm x {height_cm}cm")
+        print(f"Tile size: {tile_size_cm:.2f}cm x {tile_size_cm:.2f}cm")
         
         matrix, (rows, cols), (actual_width_cm, actual_height_cm) = generator.generate_matrix(
             image, width_cm, height_cm, preserve_aspect_ratio=True
@@ -123,7 +155,7 @@ def main():
         print("\n=== Processing Complete ===")
         print(f"Matrix dimensions: {rows} rows x {cols} columns")
         print(f"Total tiles: {info['total_tiles']}")
-        print(f"Tile size: {info['tile_size_cm']}cm x {info['tile_size_cm']}cm")
+        print(f"Tile size: {info['tile_size_cm']:.2f}cm x {info['tile_size_cm']:.2f}cm")
         print(f"Output dimensions: {actual_width_cm:.2f}cm x {actual_height_cm:.2f}cm")
         
         # Show if dimensions were adjusted
