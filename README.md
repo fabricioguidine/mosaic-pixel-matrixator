@@ -116,6 +116,7 @@ Below is a visual example showing the transformation from input image to ceramic
 ![Input Image](examples/images/input-example.png)
 
 **Artwork Attribution:**
+
 - **Artist**: Nanzita (Nanzita Ladeira Salgado Alvim Gomes, 1919-2007)
 - **Title**: São Francisco de Assis com seus companheiros
 - **Technique**: Técnica mista sobre tela (Mixed media on canvas)
@@ -127,11 +128,13 @@ Below is a visual example showing the transformation from input image to ceramic
 ### Output at Smaller Scale
 
 ![Small Scale Output](examples/images/output-small-scale.png)
+
 *Preview of the tile mosaic at smaller dimensions - showing finer detail*
 
 ### Output at Larger Scale
 
 ![Large Scale Output](examples/images/output-large-scale.png)
+
 *Preview of the tile mosaic at larger dimensions - showing pixelated tile effect more clearly*
 
 These examples demonstrate how the tool:
