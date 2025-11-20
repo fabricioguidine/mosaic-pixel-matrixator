@@ -208,12 +208,13 @@ The core algorithm ensures images are not distorted while choosing dimensions cl
 
 Output files follow this pattern:
 - **Preview**: `{image_name}-{timestamp}.png`
-- **Matrix Text**: `{image_name}-{timestamp}_matrix.txt`
-- **Matrix JSON**: `{image_name}-{timestamp}_matrix.json`
+- **Matrix Text**: `{image_name}-{timestamp}_matrix.txt` (CMYK + Hex format)
+- **Matrix JSON**: `{image_name}-{timestamp}_matrix.json` (CMYK + Hex format)
+- **Paint Inventory**: `{image_name}-{timestamp}_paints.json` (CMYK + Hex with usage counts)
 
 Timestamp format: `YYYYMMDD_HHMMSS` (e.g., `20250115_143052`)
 
-**Design Decision**: Includes image name for easy identification and timestamp to prevent overwrites.
+**Design Decision**: Includes image name for easy identification and timestamp to prevent overwrites. Uses CMYK (industry standard for paint/printing) and Hex codes for universal color reference.
 
 ## Matrix Data Structure
 
