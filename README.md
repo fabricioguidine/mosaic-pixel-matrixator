@@ -38,11 +38,8 @@ mosaic-pixel-matrixator/
 │   │   ├── __init__.py
 │   │   └── image_processor.py # Image resizing, RGB conversion
 │   ├── generation/            # Matrix generation
-│   │   ├── __init__.py
-│   │   └── matrix_generator.py # Matrix creation, dimension calculations
+│   ├── quantization/          # Color quantization and naming
 │   └── visualization/         # Image visualization
-│       ├── __init__.py
-│       └── image_recreator.py # Preview image generation
 ├── main.py                    # Main entry point and CLI
 ├── requirements.txt           # Python dependencies
 ├── .gitignore                 # Git ignore rules
@@ -279,15 +276,15 @@ Structured format with RGB and color names:
 
 ## Architecture
 
-The project follows a modular architecture with clear separation of concerns:
+Modular architecture:
+- **`config/`**: Configuration constants
+- **`io/`**: File I/O operations
+- **`processing/`**: Image processing
+- **`generation/`**: Matrix generation
+- **`quantization/`**: Color quantization and naming
+- **`visualization/`**: Preview generation
 
-- **`config/`**: Centralized configuration constants
-- **`io/`**: Input/Output operations (file handling, image loading)
-- **`processing/`**: Core image processing operations (resizing, conversion)
-- **`generation/`**: Matrix generation logic (dimensions, aspect ratio calculations)
-- **`visualization/`**: Preview image generation
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed technical documentation.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for details.
 
 ## Command-Line Options
 
