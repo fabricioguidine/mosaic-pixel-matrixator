@@ -40,9 +40,10 @@ class TestColorConverter(unittest.TestCase):
         """Test RGB to CMYK conversion for red."""
         cmyk = ColorConverter.rgb_to_cmyk(255, 0, 0)
         self.assertEqual(cmyk['c'], 0.0)
+        # Pure red: C=0, M=100%, Y=100%, K=0%
         self.assertEqual(cmyk['m'], 100.0)
         self.assertEqual(cmyk['y'], 100.0)
-        self.assertGreater(cmyk['k'], 0.0)
+        self.assertEqual(cmyk['k'], 0.0)
     
     def test_rgb_to_hsl(self):
         """Test RGB to HSL conversion."""

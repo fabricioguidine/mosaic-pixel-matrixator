@@ -51,15 +51,23 @@ class ColorConverter:
         b_norm = max(0, min(255, int(b))) / 255.0
         
         # Calculate CMYK
+        # K (black) is 1 minus the maximum of R, G, B
         k = 1.0 - max(r_norm, g_norm, b_norm)
         
         if k == 1.0:
             # Pure black
             return {'c': 0.0, 'm': 0.0, 'y': 0.0, 'k': 100.0}
         
-        c = (1.0 - r_norm - k) / (1.0 - k)
-        m = (1.0 - g_norm - k) / (1.0 - k)
-        y = (1.0 - b_norm - k) / (1.0 - k)
+        # Calculate C, M, Y when K < 1.0
+        # Formula: component = (1 - rgb_norm - k) / (1 - k)
+        c = (1.0 - r_norm - k) / (1.0 - k) if (1.0 - k) > 0 else 0.0
+        m = (1.0 - g_norm - k) / (1.0 - k) if (1.0 - k) > 0 else 0.0
+        y = (1.0 - b_norm - k) / (1.0 - k) if (1.0 - k) > 0 else 0.0
+        
+        # Ensure values are in valid range [0, 1]
+        c = max(0.0, min(1.0, c))
+        m = max(0.0, min(1.0, m))
+        y = max(0.0, min(1.0, y))
         
         # Convert to percentages and round
         return {
