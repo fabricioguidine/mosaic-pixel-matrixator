@@ -1,6 +1,5 @@
 """Color conversion utilities for industry-standard color systems."""
 
-import numpy as np
 from typing import Dict
 
 
