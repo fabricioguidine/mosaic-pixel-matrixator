@@ -1,6 +1,6 @@
 # Mosaic Pixel Matrixator
 
-A Python tool to convert images into ceramic tile color matrices. This project takes an image as input and generates a matrix of RGB color values that represent how ceramic tiles (2x2cm) should be arranged to replicate the image at a specified scale, while preserving the original image's aspect ratio.
+A Python tool to convert images into ceramic tile color matrices. This project takes an image as input and generates a matrix of RGB color values that represent how ceramic tiles (default 2.2cm × 2.2cm, configurable) should be arranged to replicate the image at a specified scale, while preserving the original image's aspect ratio.
 
 ## Features
 
@@ -154,15 +154,62 @@ These examples demonstrate how the tool:
 
 ## How It Works
 
-1. **Image Loading**: The tool loads the image from the `input/` folder
-2. **Aspect Ratio Calculation**: Calculates the original image's aspect ratio
-3. **Dimension Adjustment**: Adjusts requested dimensions to maintain aspect ratio (fits within max bounds)
-4. **Matrix Size Calculation**: Based on adjusted dimensions and tile size (2cm x 2cm), calculates the matrix dimensions
-5. **Image Resizing**: The image is resized to match the matrix dimensions using high-quality resampling
-6. **Color Extraction**: Each pixel in the resized image represents a tile, and its RGB values are extracted
-7. **Matrix Generation**: The RGB values are organized into a matrix (array of arrays)
-8. **File Output**: The matrix is saved in both text and JSON formats
-9. **Preview Generation**: A preview image is created from the matrix to visualize the final result
+### Processing Pipeline
+
+1. **Image Loading**: 
+   - The tool loads the image from the `input/` folder
+   - Supports common formats: JPG, PNG, BMP, GIF, TIFF, WEBP
+   - Processes one image at a time (the first image found)
+
+2. **Aspect Ratio Calculation**: 
+   - Calculates the original image's aspect ratio (width / height)
+   - This ratio is preserved throughout the process to prevent distortion
+
+3. **Dimension Calculation (Closest Match Algorithm)**:
+   - You provide requested output dimensions (width × height in centimeters)
+   - The tool evaluates two options:
+     - **Option 1**: Fit to requested width (height calculated from aspect ratio)
+     - **Option 2**: Fit to requested height (width calculated from aspect ratio)
+   - Chooses the option with the smallest total difference from your request
+   - This ensures the output is as close as possible to what you requested
+
+4. **Matrix Size Calculation**: 
+   - Based on the final dimensions and tile size (default: 2.2cm × 2.2cm)
+   - Calculates how many tiles are needed: `rows = height / tile_size`, `columns = width / tile_size`
+   - Each tile in the matrix represents one ceramic tile position
+
+5. **Image Resizing**: 
+   - The original image is resized to match the matrix dimensions (rows × columns)
+   - Uses high-quality LANCZOS resampling for better color representation
+   - Each pixel in the resized image corresponds to one tile position
+
+6. **Color Extraction**: 
+   - Each pixel's RGB values are extracted (0-255 range)
+   - These values represent the color that each ceramic tile should have
+
+7. **Matrix Generation**: 
+   - RGB values are organized into a 2D matrix (array of arrays)
+   - Format: `matrix[row][column] = [R, G, B]`
+   - This matrix maps directly to the physical tile arrangement
+
+8. **File Output**: 
+   - Matrix saved as human-readable text file
+   - Matrix saved as JSON for programmatic use
+   - Both files include matrix dimensions and RGB values
+
+9. **Preview Generation**: 
+   - A preview image is created from the matrix
+   - Upscaled 10× for visibility (shows pixelated tile effect)
+   - Allows you to see how the final ceramic mosaic will look
+
+### Key Rules and Constraints
+
+- **Tile Size**: Default is 2.2cm × 2.2cm, but can be customized via `--tile-size` parameter
+- **One Image at a Time**: The script processes the first image found in the `input/` folder
+- **Aspect Ratio Preservation**: The image aspect ratio is always maintained (no distortion)
+- **Closest Match**: The algorithm chooses dimensions closest to your request, even if it means exceeding one dimension
+- **Matrix Precision**: Matrix dimensions are calculated by dividing output size by tile size (integer division)
+- **Color Format**: Output uses RGB values (0-255) for maximum compatibility
 
 ### Aspect Ratio Preservation
 
@@ -180,10 +227,14 @@ For example, if your image is 16:9 and you request 200cm x 150cm:
 
 ## Tile Specifications
 
-- **Default tile size**: 2cm × 2cm (configurable via `--tile-size` parameter)
+- **Default tile size**: 2.2cm × 2.2cm (configurable via `--tile-size` parameter)
 - **Tile size options**: Can be specified via command line or interactive prompt
 - **Color format**: RGB (Red, Green, Blue) values from 0-255
 - **Matrix structure**: Array of arrays where each cell represents one tile
+- **Scale calculation**: 
+  - Matrix dimensions = Output dimensions ÷ Tile size
+  - Example: 200cm ÷ 2.2cm = 90.9 → 90 columns (integer division)
+  - Example: 100cm ÷ 2.2cm = 45.5 → 45 rows (integer division)
 
 ## Output Format
 
@@ -246,7 +297,7 @@ python main.py [--width WIDTH] [--height HEIGHT] [--tile-size TILE_SIZE]
 Options:
   --width      Maximum output width in centimeters
   --height     Maximum output height in centimeters
-  --tile-size  Tile size in centimeters (default: 2.0cm)
+  --tile-size  Tile size in centimeters (default: 2.2cm)
 
 If no arguments provided, the script will prompt for dimensions and tile size interactively.
 ```

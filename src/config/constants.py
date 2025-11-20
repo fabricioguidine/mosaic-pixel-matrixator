@@ -7,7 +7,7 @@ Modify these values to change default behavior (e.g., tile size, supported forma
 
 # Standard ceramic tile size in centimeters
 # This value determines the size of each tile in the output matrix
-TILE_SIZE_CM = 2.0
+TILE_SIZE_CM = 2.2
 
 # Supported image file formats (case-insensitive)
 # Files with these extensions will be recognized as valid input images
