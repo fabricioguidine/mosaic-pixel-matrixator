@@ -107,7 +107,7 @@ python main.py --width 200 --height 150
 # Output dimensions: 200.00cm x 112.36cm
 # 
 # Dimension adjustments (to preserve aspect ratio 1.78):
-#   Width:  200.00cm (exact match)
+#   Width:  200.00cm requested → 200.00cm actual (difference: +0.00cm)
 #   Height: 150.00cm requested → 112.36cm actual (difference: -37.64cm)
 #
 # 3. Files generated in output/:

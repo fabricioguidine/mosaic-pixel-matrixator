@@ -159,16 +159,14 @@ def main():
         print(f"Output dimensions: {actual_width_cm:.2f}cm x {actual_height_cm:.2f}cm")
         
         # Show dimension differences
+        # Always show adjustments if either dimension was changed to preserve aspect ratio
         if width_diff > 0.01 or height_diff > 0.01:
             print(f"\nDimension adjustments (to preserve aspect ratio {orig_aspect_ratio:.2f}):")
-            if width_diff > 0.01:
-                print(f"  Width:  {width_cm:.2f}cm requested → {actual_width_cm:.2f}cm actual (difference: {width_diff:+.2f}cm)")
-            else:
-                print(f"  Width:  {width_cm:.2f}cm (exact match)")
-            if height_diff > 0.01:
-                print(f"  Height: {height_cm:.2f}cm requested → {actual_height_cm:.2f}cm actual (difference: {height_diff:+.2f}cm)")
-            else:
-                print(f"  Height: {height_cm:.2f}cm (exact match)")
+            print(f"  Width:  {width_cm:.2f}cm requested → {actual_width_cm:.2f}cm actual (difference: {width_diff:+.2f}cm)")
+            print(f"  Height: {height_cm:.2f}cm requested → {actual_height_cm:.2f}cm actual (difference: {height_diff:+.2f}cm)")
+        else:
+            # Only show this if both dimensions match exactly (rare case)
+            print(f"\nDimensions match exactly (aspect ratio {orig_aspect_ratio:.2f} preserved naturally)")
         
         # Generate output filenames with image name and timestamp
         input_name = Path(image_path).stem
