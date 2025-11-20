@@ -1,7 +1,5 @@
-"""Primary color mix representation for RGB values with industry-standard formats."""
+"""Primary color mix representation with industry-standard formats."""
 
-import numpy as np
-from typing import Tuple
 from .color_converter import ColorConverter
 
 

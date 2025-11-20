@@ -1,4 +1,4 @@
-"""Paint color inventory and requirements."""
+"""Paint color inventory with industry-standard color codes."""
 
 import numpy as np
 from typing import Dict, List, Tuple
