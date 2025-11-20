@@ -2,7 +2,8 @@
 
 from .color_quantizer import ColorQuantizer
 from .color_mixer import ColorMixer
+from .color_converter import ColorConverter
 from .paint_colors import PaintColorInventory
 
-__all__ = ['ColorQuantizer', 'ColorMixer', 'PaintColorInventory']
+__all__ = ['ColorQuantizer', 'ColorMixer', 'ColorConverter', 'PaintColorInventory']
 

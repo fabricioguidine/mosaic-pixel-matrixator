@@ -1,11 +1,12 @@
-"""Primary color mix representation for RGB values."""
+"""Primary color mix representation for RGB values with industry-standard formats."""
 
 import numpy as np
 from typing import Tuple
+from .color_converter import ColorConverter
 
 
 class ColorMixer:
-    """Represents RGB colors as a mix of three primary colors (Red, Green, Blue)."""
+    """Represents RGB colors with industry-standard color systems for paint purchasing."""
     
     # Primary colors in RGB space
     PRIMARY_RED = np.array([255, 0, 0], dtype=np.uint8)
@@ -15,8 +16,8 @@ class ColorMixer:
     @classmethod
     def get_primary_mix(cls, r: int, g: int, b: int) -> dict:
         """
-        Get the primary color mix information for an RGB color.
-        Returns the amount of Red, Green, and Blue primaries needed.
+        Get industry-standard color information for an RGB color.
+        Includes CMYK (for paint/printing) and Hex (for digital reference).
         
         Args:
             r: Red value (0-255)
@@ -24,41 +25,23 @@ class ColorMixer:
             b: Blue value (0-255)
         
         Returns:
-            Dictionary with primary color mix information:
+            Dictionary with industry-standard color information:
             {
                 'rgb': [r, g, b],
-                'red': r_value (0-255),
-                'green': g_value (0-255),
-                'blue': b_value (0-255),
-                'red_pct': red_percentage (0-100),
-                'green_pct': green_percentage (0-100),
-                'blue_pct': blue_percentage (0-100)
+                'hex': '#RRGGBB' (hexadecimal code),
+                'cmyk': {'c': cyan%, 'm': magenta%, 'y': yellow%, 'k': black%},
+                'hsl': {'h': hue, 's': saturation%, 'l': lightness%}
             }
         """
-        # Clamp values to valid range
-        r = int(max(0, min(255, r)))
-        g = int(max(0, min(255, g)))
-        b = int(max(0, min(255, b)))
+        # Get all industry standards
+        standards = ColorConverter.get_industry_standards(r, g, b)
         
-        # Calculate percentages (how much of each primary color)
-        red_pct = round((r / 255.0) * 100, 1)
-        green_pct = round((g / 255.0) * 100, 1)
-        blue_pct = round((b / 255.0) * 100, 1)
-        
-        return {
-            'rgb': [r, g, b],
-            'red': r,
-            'green': g,
-            'blue': b,
-            'red_pct': red_pct,
-            'green_pct': green_pct,
-            'blue_pct': blue_pct
-        }
+        return standards
     
     @classmethod
     def format_primary_mix_text(cls, r: int, g: int, b: int) -> str:
         """
-        Format RGB with primary color mix information.
+        Format RGB with CMYK paint mixing information.
         
         Args:
             r: Red value
@@ -66,10 +49,12 @@ class ColorMixer:
             b: Blue value
         
         Returns:
-            Formatted string: "R,G,B[R:r%,G:g%,B:b%]"
+            Formatted string: "R,G,B[C:c%,M:m%,Y:y%,K:k%] #HEX"
         """
         mix = cls.get_primary_mix(r, g, b)
-        return f"{int(r)},{int(g)},{int(b)}[R:{mix['red_pct']:.1f}%,G:{mix['green_pct']:.1f}%,B:{mix['blue_pct']:.1f}%]"
+        cmyk = mix['cmyk']
+        hex_code = mix['hex']
+        return f"{int(r)},{int(g)},{int(b)}[C:{cmyk['c']:.1f}%,M:{cmyk['m']:.1f}%,Y:{cmyk['y']:.1f}%,K:{cmyk['k']:.1f}%] {hex_code}"
     
     @classmethod
     def format_primary_mix_compact(cls, r: int, g: int, b: int) -> str:

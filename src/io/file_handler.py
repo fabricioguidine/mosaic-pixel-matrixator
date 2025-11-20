@@ -20,7 +20,8 @@ def save_matrix_to_file(matrix: np.ndarray, output_path: str):
     with open(output_file, 'w') as f:
         f.write("# RGB Color Matrix\n")
         f.write(f"# Matrix dimensions: {matrix.shape[0]} rows x {matrix.shape[1]} columns\n")
-        f.write("# Format: R,G,B[R:red%,G:green%,B:blue%] - Mix of three primary colors\n\n")
+        f.write("# Format: R,G,B[C:cyan%,M:magenta%,Y:yellow%,K:black%] #HEX\n")
+        f.write("# CMYK percentages for paint mixing (industry standard)\n\n")
         
         for i, row in enumerate(matrix):
             f.write(f"# Row {i+1}\n")

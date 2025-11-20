@@ -13,7 +13,7 @@ A Python tool that transforms images into ceramic tile mosaics by generating RGB
 - **📸 Image Processing**: Supports common formats (JPG, PNG, BMP, GIF, TIFF, WEBP)
 - **📐 Aspect Ratio Preservation**: Automatically maintains image proportions
 - **🎨 High-Quality Quantization**: Median cut algorithm for optimized color reduction
-- **🎯 Primary Color Mix**: Shows R%, G%, B% percentages for paint mixing
+- **🎨 Industry-Standard Colors**: CMYK (paint/printing) and Hex codes for color matching
 - **📦 Paint Inventory**: Lists all required paint colors with usage counts
 - **📊 Multiple Outputs**: TXT, JSON matrices + PNG preview + paint inventory
 - **⚙️ Configurable**: Custom tile size and color palette options
@@ -126,7 +126,7 @@ python main.py --width 200 --height 150 --no-quantize
 
 - **Aspect Ratio**: Always preserved (no distortion)
 - **Closest Match**: Dimensions use closest match algorithm
-- **Primary Color Mix**: Each color shows R%, G%, B% percentages
+- **Industry Standards**: Each color shows CMYK (for paint mixing) and Hex (for reference)
 - **Tile Size**: Default 2.2cm, customizable via `--tile-size`
 - **Color Quantization**: Default 64 colors using median cut
 
@@ -137,10 +137,11 @@ python main.py --width 200 --height 150 --no-quantize
 ```
 # RGB Color Matrix
 # Matrix dimensions: 68 rows x 43 columns
-# Format: R,G,B[R:red%,G:green%,B:blue%] - Mix of three primary colors
+# Format: R,G,B[C:cyan%,M:magenta%,Y:yellow%,K:black%] #HEX
+# CMYK percentages for paint mixing (industry standard)
 
 # Row 1
-109,73,77[R:42.7%,G:28.6%,B:30.2%] 111,76,80[R:43.5%,G:29.8%,B:31.4%] ...
+109,73,77[C:0.0%,M:32.9%,Y:29.4%,K:57.3%] #6D494D 111,76,80[C:0.0%,M:31.5%,Y:27.9%,K:56.5%] #6F4C50 ...
 ```
 
 ### JSON Matrix (`{name}-{timestamp}_matrix.json`)
@@ -155,12 +156,18 @@ python main.py --width 200 --height 150 --no-quantize
     [
       {
         "rgb": [109, 73, 77],
-        "red": 109,
-        "green": 73,
-        "blue": 77,
-        "red_pct": 42.7,
-        "green_pct": 28.6,
-        "blue_pct": 30.2
+        "hex": "#6D494D",
+        "cmyk": {
+          "c": 0.0,
+          "m": 32.9,
+          "y": 29.4,
+          "k": 57.3
+        },
+        "hsl": {
+          "h": 353.3,
+          "s": 19.8,
+          "l": 35.7
+        }
       }
     ]
   ]
@@ -176,17 +183,34 @@ python main.py --width 200 --height 150 --no-quantize
   "required_paints": [
     {
       "rgb": [255, 255, 255],
-      "red": 255,
-      "green": 255,
-      "blue": 255,
-      "count": 450,
-      "red_pct": 100.0,
-      "green_pct": 100.0,
-      "blue_pct": 100.0
+      "hex": "#FFFFFF",
+      "cmyk": {
+        "c": 0.0,
+        "m": 0.0,
+        "y": 0.0,
+        "k": 0.0
+      },
+      "hsl": {
+        "h": 0.0,
+        "s": 0.0,
+        "l": 100.0
+      },
+      "count": 450
     }
   ]
 }
 ```
+
+**Color System Explanation:**
+- **RGB**: Digital color values (0-255) - standard for screens/displays
+- **Hex**: Hexadecimal color code (e.g., `#FFFFFF` for white) - universal color reference
+- **CMYK**: Cyan, Magenta, Yellow, Black percentages (0-100%) - **industry standard for paint/printing**
+  - Use CMYK values to mix paint colors or purchase from paint suppliers
+  - Each percentage tells you how much of each primary paint color to mix
+- **HSL**: Hue, Saturation, Lightness - intuitive color description
+
+**For Paint Purchasing:**
+Use the **CMYK values** or **Hex codes** when ordering from paint suppliers. Most paint stores can match colors using these industry-standard codes.
 
 ## 🏗️ Project Structure
 
