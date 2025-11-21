@@ -231,6 +231,21 @@ def main():
         print(f"  Base colors to purchase: {len(base_colors)} (Cyan, Magenta, Yellow, Black, White)")
         print(f"  Total unique colors in image: {paint_inventory.get_unique_colors_count()}")
         print(f"  Total tiles: {paint_inventory.get_total_tiles()}")
+        
+        # Display detailed tile count per color
+        print(f"\n=== Tiles to Paint per Color ===")
+        print(f"{'Color (Hex)':<12} {'RGB':<20} {'CMYK':<35} {'Tiles':<8} {'Percentage':<12}")
+        print("-" * 90)
+        total_tiles = paint_inventory.get_total_tiles()
+        for paint in required_paints:
+            hex_code = paint['hex']
+            rgb_str = f"({paint['rgb'][0]},{paint['rgb'][1]},{paint['rgb'][2]})"
+            cmyk = paint['cmyk']
+            cmyk_str = f"C:{cmyk['c']:.1f}% M:{cmyk['m']:.1f}% Y:{cmyk['y']:.1f}% K:{cmyk['k']:.1f}%"
+            count = paint['count']
+            percentage = (count / total_tiles * 100) if total_tiles > 0 else 0
+            print(f"{hex_code:<12} {rgb_str:<20} {cmyk_str:<35} {count:<8} {percentage:>6.2f}%")
+        
         print(f"\nNote: All colors can be achieved by mixing the base CMYK colors.")
         
         print("\nProcessing completed successfully!")
