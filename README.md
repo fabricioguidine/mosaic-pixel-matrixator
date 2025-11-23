@@ -140,11 +140,12 @@ python main.py --width 200 --height 150 --no-quantize
 
 ### Text Matrix (`{name}-{timestamp}_matrix.txt`)
 
-Includes base colors to purchase and mixing instructions for each pixel:
+Includes base colors to purchase, tile count summary for assembly, and mixing instructions for each pixel:
 
 ```
 # RGB Color Matrix with Paint Mixing Instructions
 # Matrix dimensions: 68 rows x 43 columns
+# Total tiles: 2924
 # Format: R,G,B[CMYK] #HEX {mix_instruction}
 
 # BASE COLORS TO PURCHASE:
@@ -154,9 +155,25 @@ Includes base colors to purchase and mixing instructions for each pixel:
 # - BLACK: RGB[0, 0, 0] #000000 CMYK(0.0%,0.0%,0.0%,100.0%)
 # - WHITE: RGB[255, 255, 255] #FFFFFF CMYK(0.0%,0.0%,0.0%,0.0%)
 
+# ============================================================================
+# TILES TO PAINT - SUMMARY FOR ASSEMBLY
+# ============================================================================
+# Total unique colors: 32
+# Total tiles to paint: 2924
+#
+# Color (Hex)     | RGB          | CMYK                    | Tiles | %
+# ----------------------------------------------------------------------------
+# #FFFFFF         | (255,255,255) | C:0.0% M:0.0% Y:0.0% K:0.0% | 450   | 15.39%
+# #18122C         | (24,18,44)    | C:45.5% M:59.1% Y:0.0% K:82.7% | 320  | 10.94%
+# ...
+
+# MATRIX DATA (Row by Row)
+# ============================================================================
 # Row 1
 24,18,44[C:45.5%,M:59.1%,Y:0.0%,K:82.7%] #18122C {Mix: 24.3% cyan, 31.6% magenta, 44.2% black} ...
 ```
+
+**Tile Count Summary:** The file includes a "TILES TO PAINT" section at the top showing exactly how many tiles of each color you need to paint. This makes it easy to prepare all tiles before assembly.
 
 ### JSON Matrix (`{name}-{timestamp}_matrix.json`)
 
@@ -166,6 +183,27 @@ Includes base colors to purchase and mixing instructions for each pixel:
     "rows": 68,
     "columns": 43
   },
+  "total_tiles": 2924,
+  "total_unique_colors": 32,
+  "tiles_to_paint": [
+    {
+      "rgb": [255, 255, 255],
+      "hex": "#FFFFFF",
+      "cmyk": {
+        "c": 0.0,
+        "m": 0.0,
+        "y": 0.0,
+        "k": 0.0
+      },
+      "hsl": {
+        "h": 0.0,
+        "s": 0.0,
+        "l": 100.0
+      },
+      "tile_count": 450,
+      "percentage": 15.39
+    }
+  ],
   "matrix": [
     [
       {
@@ -187,6 +225,8 @@ Includes base colors to purchase and mixing instructions for each pixel:
   ]
 }
 ```
+
+**Tile Count Information:** The JSON includes `tiles_to_paint` array with `tile_count` and `percentage` for each color, making it easy to programmatically process tile requirements.
 
 ### Paint Colors (`{name}-{timestamp}_paints.json`)
 

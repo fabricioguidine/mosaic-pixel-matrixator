@@ -203,12 +203,12 @@ def main():
         
         # Save as text file with mixing instructions
         txt_output = output_dir / f"{input_name}-{timestamp}_matrix.txt"
-        save_matrix_to_file(matrix, str(txt_output), base_colors)
+        save_matrix_to_file(matrix, str(txt_output), base_colors, paint_inventory)
         print(f"\nMatrix saved to: {txt_output}")
         
         # Save as JSON file
         json_output = output_dir / f"{input_name}-{timestamp}_matrix.json"
-        save_matrix_to_json(matrix, str(json_output))
+        save_matrix_to_json(matrix, str(json_output), paint_inventory)
         print(f"Matrix saved to: {json_output}")
         
         # Save paint color requirements
