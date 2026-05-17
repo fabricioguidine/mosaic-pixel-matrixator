@@ -1,8 +1,12 @@
 # Mosaic Pixel Matrixator
 
-![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)
+![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Status](https://img.shields.io/badge/status-active-success.svg)
+[![CI](https://github.com/fabricioguidine/mosaic-pixel-matrixator/actions/workflows/ci.yml/badge.svg)](https://github.com/fabricioguidine/mosaic-pixel-matrixator/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/fabricioguidine/mosaic-pixel-matrixator/branch/main/graph/badge.svg)](https://codecov.io/gh/fabricioguidine/mosaic-pixel-matrixator)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 
 > Convert images into ceramic tile color matrices with paint mixing instructions.
 

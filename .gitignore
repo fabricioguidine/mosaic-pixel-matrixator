@@ -52,7 +52,16 @@ output/*
 # Testing
 .pytest_cache/
 .coverage
+coverage.xml
 htmlcov/
+
+# Linters / type-checkers
+.ruff_cache/
+.mypy_cache/
+
+# Claude
+CLAUDE.md
+.claude/
 
 # Jupyter Notebook
 .ipynb_checkpoints

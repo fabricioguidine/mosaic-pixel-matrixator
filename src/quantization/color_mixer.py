@@ -5,18 +5,18 @@ from .color_converter import ColorConverter
 
 class ColorMixer:
     """Represents RGB colors with industry-standard color systems for paint purchasing."""
-    
+
     @classmethod
     def get_primary_mix(cls, r: int, g: int, b: int) -> dict:
         """
         Get industry-standard color information for an RGB color.
         Includes CMYK (for paint/printing) and Hex (for digital reference).
-        
+
         Args:
             r: Red value (0-255)
             g: Green value (0-255)
             b: Blue value (0-255)
-        
+
         Returns:
             Dictionary with industry-standard color information:
             {
@@ -28,19 +28,19 @@ class ColorMixer:
         """
         # Get all industry standards
         standards = ColorConverter.get_industry_standards(r, g, b)
-        
+
         return standards
-    
+
     @classmethod
     def format_primary_mix_text(cls, r: int, g: int, b: int) -> str:
         """
         Format RGB with CMYK paint mixing information.
-        
+
         Args:
             r: Red value
             g: Green value
             b: Blue value
-        
+
         Returns:
             Formatted string: "R,G,B[C:c%,M:m%,Y:y%,K:k%] #HEX"
         """
@@ -48,17 +48,17 @@ class ColorMixer:
         cmyk = mix['cmyk']
         hex_code = mix['hex']
         return f"{int(r)},{int(g)},{int(b)}[C:{cmyk['c']:.1f}%,M:{cmyk['m']:.1f}%,Y:{cmyk['y']:.1f}%,K:{cmyk['k']:.1f}%] {hex_code}"
-    
+
     @classmethod
     def format_primary_mix_compact(cls, r: int, g: int, b: int) -> str:
         """
         Format RGB with compact primary color mix information.
-        
+
         Args:
             r: Red value
             g: Green value
             b: Blue value
-        
+
         Returns:
             Formatted string: "R,G,B[R:r,G:g,B:b]"
         """

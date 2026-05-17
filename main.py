@@ -1,35 +1,35 @@
 """Main entry point for Mosaic Pixel Matrixator."""
 
-import sys
-import json
 import argparse
-from pathlib import Path
+import json
+import sys
 from datetime import datetime
+from pathlib import Path
 
-from src.io import get_image_files, load_image, save_matrix_to_file, save_matrix_to_json
-from src.generation import MatrixGenerator
-from src.visualization import recreate_image_from_matrix
 from src.config import TILE_SIZE_CM
+from src.generation import MatrixGenerator
+from src.io import get_image_files, load_image, save_matrix_to_file, save_matrix_to_json
+from src.visualization import recreate_image_from_matrix
 
 
 def get_user_input(
-    width_cm: float = None, 
-    height_cm: float = None, 
+    width_cm: float = None,
+    height_cm: float = None,
     tile_size_cm: float = None
 ) -> tuple:
     """
     Get user input for dimensions and tile size.
-    
+
     Args:
         width_cm: Optional width in centimeters (from command line)
         height_cm: Optional height in centimeters (from command line)
         tile_size_cm: Optional tile size in centimeters (from command line)
-    
+
     Returns:
         Tuple of (width, height, tile_size) in centimeters
     """
     print("\n=== Mosaic Pixel Matrixator ===\n")
-    
+
     if width_cm is not None and height_cm is not None:
         if width_cm <= 0 or height_cm <= 0:
             print("Error: Dimensions must be positive numbers.")
@@ -37,16 +37,16 @@ def get_user_input(
         # Use provided tile size or default
         tile_size = tile_size_cm if tile_size_cm is not None and tile_size_cm > 0 else TILE_SIZE_CM
         return width_cm, height_cm, tile_size
-    
+
     try:
         width = float(input("Enter output width in centimeters: "))
         height = float(input("Enter output height in centimeters: "))
         tile_size_input = input(f"Enter tile size in centimeters (default: {TILE_SIZE_CM}cm): ").strip()
-        
+
         if width <= 0 or height <= 0:
             print("Error: Dimensions must be positive numbers.")
             sys.exit(1)
-        
+
         if tile_size_input:
             tile_size = float(tile_size_input)
             if tile_size <= 0:
@@ -54,7 +54,7 @@ def get_user_input(
                 sys.exit(1)
         else:
             tile_size = TILE_SIZE_CM
-        
+
         return width, height, tile_size
     except ValueError:
         print("Error: Please enter valid numbers.")
@@ -67,7 +67,7 @@ def get_user_input(
 def main():
     """
     Main function to process images.
-    
+
     Orchestrates the complete processing pipeline:
     1. Checks input directory and finds images
     2. Loads the first image found
@@ -82,8 +82,8 @@ def main():
     parser.add_argument('--width', type=float, help='Output width in centimeters')
     parser.add_argument('--height', type=float, help='Output height in centimeters')
     parser.add_argument(
-        '--tile-size', 
-        type=float, 
+        '--tile-size',
+        type=float,
         default=TILE_SIZE_CM,
         help=f'Tile size in centimeters (default: {TILE_SIZE_CM}cm)'
     )
@@ -99,12 +99,12 @@ def main():
         help='Disable color quantization (use original colors)'
     )
     args = parser.parse_args()
-    
+
     # Validate tile size
     if args.tile_size <= 0:
         print("Error: Tile size must be a positive number.")
         sys.exit(1)
-    
+
     # Check input directory
     input_dir = Path("input")
     if not input_dir.exists():
@@ -112,42 +112,42 @@ def main():
         print(f"Created input directory: {input_dir}")
         print("Please place image files in the 'input' directory and run again.")
         return
-    
+
     # Get image files
     image_files = get_image_files("input")
-    
+
     if not image_files:
         print("No image files found in the 'input' directory.")
         print("Supported formats: JPG, JPEG, PNG, BMP, GIF, TIFF, WEBP")
         return
-    
+
     # Process one image at a time
     print(f"\nFound {len(image_files)} image file(s) in input directory:")
     for i, img_file in enumerate(image_files, 1):
         print(f"  {i}. {Path(img_file).name}")
-    
+
     # Process the first image
     image_path = image_files[0]
     print(f"\nProcessing: {Path(image_path).name}")
-    
+
     # Load image
     image = load_image(image_path)
     if image is None:
         print("Failed to load image.")
         return
-    
+
     # Get user input for dimensions and tile size
     width_cm, height_cm, tile_size_cm = get_user_input(
-        args.width, 
-        args.height, 
+        args.width,
+        args.height,
         args.tile_size
     )
-    
+
     # Initialize matrix generator with specified tile size
     generator = MatrixGenerator(tile_size_cm=tile_size_cm)
-    
+
     print("\nProcessing image...")
-    
+
     # Generate matrix
     try:
         # Get original image dimensions for reference
@@ -156,25 +156,25 @@ def main():
         print(f"Original image: {orig_width}x{orig_height} (aspect ratio: {orig_aspect_ratio:.2f})")
         print(f"Requested dimensions: {width_cm}cm x {height_cm}cm")
         print(f"Tile size: {tile_size_cm:.2f}cm x {tile_size_cm:.2f}cm")
-        
+
         matrix, (rows, cols), (actual_width_cm, actual_height_cm), (width_diff, height_diff) = generator.generate_matrix(
-            image, 
-            width_cm, 
-            height_cm, 
+            image,
+            width_cm,
+            height_cm,
             preserve_aspect_ratio=True,
             quantize_colors=not args.no_quantize,
             num_colors=args.num_colors
         )
-        
+
         # Get matrix information
         info = generator.get_matrix_info(matrix)
-        
+
         print("\n=== Processing Complete ===")
         print(f"Matrix dimensions: {rows} rows x {cols} columns")
         print(f"Total tiles: {info['total_tiles']}")
         print(f"Tile size: {info['tile_size_cm']:.2f}cm x {info['tile_size_cm']:.2f}cm")
         print(f"Output dimensions: {actual_width_cm:.2f}cm x {actual_height_cm:.2f}cm")
-        
+
         # Show dimension differences
         # Always show adjustments if either dimension was changed to preserve aspect ratio
         if width_diff > 0.01 or height_diff > 0.01:
@@ -184,33 +184,33 @@ def main():
         else:
             # Only show this if both dimensions match exactly (rare case)
             print(f"\nDimensions match exactly (aspect ratio {orig_aspect_ratio:.2f} preserved naturally)")
-        
+
         # Generate output filenames with image name and timestamp
         input_name = Path(image_path).stem
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_dir = Path("output")
         output_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Calculate paint color inventory
-        from src.quantization.paint_colors import PaintColorInventory
         from src.quantization.color_base_selector import ColorBaseSelector
-        
+        from src.quantization.paint_colors import PaintColorInventory
+
         paint_inventory = PaintColorInventory.from_matrix(matrix)
         required_paints = paint_inventory.get_required_paints()
-        
+
         # Select base colors to purchase (minimum set)
         base_colors = ColorBaseSelector.select_base_colors(matrix)
-        
+
         # Save as text file with mixing instructions
         txt_output = output_dir / f"{input_name}-{timestamp}_matrix.txt"
         save_matrix_to_file(matrix, str(txt_output), base_colors, paint_inventory)
         print(f"\nMatrix saved to: {txt_output}")
-        
+
         # Save as JSON file
         json_output = output_dir / f"{input_name}-{timestamp}_matrix.json"
         save_matrix_to_json(matrix, str(json_output), paint_inventory)
         print(f"Matrix saved to: {json_output}")
-        
+
         # Save paint color requirements
         paints_output = output_dir / f"{input_name}-{timestamp}_paints.json"
         paint_data = {
@@ -221,19 +221,19 @@ def main():
         with open(paints_output, 'w') as f:
             json.dump(paint_data, f, indent=2)
         print(f"Paint colors saved to: {paints_output}")
-        
+
         # Recreate image from matrix for visualization
         preview_output = output_dir / f"{input_name}-{timestamp}.png"
         recreate_image_from_matrix(matrix, str(preview_output), scale_factor=10)
         print(f"Preview image saved to: {preview_output}")
-        
-        print(f"\nPaint Requirements:")
+
+        print("\nPaint Requirements:")
         print(f"  Base colors to purchase: {len(base_colors)} (Cyan, Magenta, Yellow, Black, White)")
         print(f"  Total unique colors in image: {paint_inventory.get_unique_colors_count()}")
         print(f"  Total tiles: {paint_inventory.get_total_tiles()}")
-        
+
         # Display detailed tile count per color
-        print(f"\n=== Tiles to Paint per Color ===")
+        print("\n=== Tiles to Paint per Color ===")
         print(f"{'Color (Hex)':<12} {'RGB':<20} {'CMYK':<35} {'Tiles':<8} {'Percentage':<12}")
         print("-" * 90)
         total_tiles = paint_inventory.get_total_tiles()
@@ -245,11 +245,11 @@ def main():
             count = paint['count']
             percentage = (count / total_tiles * 100) if total_tiles > 0 else 0
             print(f"{hex_code:<12} {rgb_str:<20} {cmyk_str:<35} {count:<8} {percentage:>6.2f}%")
-        
-        print(f"\nNote: All colors can be achieved by mixing the base CMYK colors.")
-        
+
+        print("\nNote: All colors can be achieved by mixing the base CMYK colors.")
+
         print("\nProcessing completed successfully!")
-        
+
     except Exception as e:
         print(f"\nError during processing: {e}")
         import traceback
