@@ -56,7 +56,9 @@ def _run_cli(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
 def test_cli_end_to_end_produces_all_outputs(tmp_path: Path) -> None:
     _make_input_image(tmp_path / "input")
 
-    # Square input + tile-size 2.0: width 20cm -> 10 cols, height 16cm -> 8 rows.
+    # Square (1:1) input with aspect-ratio preservation: requesting 20x16 cm
+    # resolves to 20x20 cm (the fit-to-width option wins the tie), which at
+    # tile-size 2.0 gives a 10x10 tile matrix.
     result = _run_cli(tmp_path, "--width", "20", "--height", "16", "--tile-size", "2.0")
 
     assert result.returncode == 0, f"stderr:\n{result.stderr}\nstdout:\n{result.stdout}"
@@ -76,15 +78,15 @@ def test_cli_end_to_end_produces_all_outputs(tmp_path: Path) -> None:
     assert len(paints_jsons) == 1
 
     # Preview is a valid RGB PNG upscaled by the default scale factor (10).
-    # Matrix is (rows=8, cols=10); PIL size is (width=cols*10, height=rows*10).
+    # Matrix is (rows=10, cols=10); PIL size is (width=cols*10, height=rows*10).
     with Image.open(pngs[0]) as preview:
         assert preview.mode == "RGB"
-        assert preview.size == (10 * 10, 8 * 10)
+        assert preview.size == (10 * 10, 10 * 10)
 
     data = json.loads(matrix_jsons[0].read_text(encoding="utf-8"))
-    assert data["dimensions"] == {"rows": 8, "columns": 10}
-    assert data["total_tiles"] == 80
-    assert len(data["matrix"]) == 8
+    assert data["dimensions"] == {"rows": 10, "columns": 10}
+    assert data["total_tiles"] == 100
+    assert len(data["matrix"]) == 10
     assert len(data["matrix"][0]) == 10
     assert {"rgb", "hex", "cmyk", "hsl"} <= set(data["matrix"][0][0])
 
