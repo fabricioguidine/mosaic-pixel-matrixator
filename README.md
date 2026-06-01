@@ -1,6 +1,7 @@
 # Mosaic Pixel Matrixator
 
-![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)
+![Python Version](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue.svg)
+![Platforms](https://img.shields.io/badge/platforms-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Status](https://img.shields.io/badge/status-active-success.svg)
 [![CI](https://github.com/fabricioguidine/mosaic-pixel-matrixator/actions/workflows/ci.yml/badge.svg)](https://github.com/fabricioguidine/mosaic-pixel-matrixator/actions/workflows/ci.yml)
@@ -26,19 +27,44 @@ A Python tool that transforms images into ceramic tile mosaics by generating RGB
 
 ## 📋 Requirements
 
-- Python 3.8 or higher
+- Python 3.11 or higher (tested on 3.11, 3.12, 3.13)
 - Pillow >= 10.0.0
 - NumPy >= 1.24.0
 
+Runs on **Linux, macOS, and Windows** — every release is tested on all three in CI.
+
 ## 📦 Installation
 
+Clone the repository, create a virtual environment, and install the dependencies.
+
+### Linux / macOS
+
 ```bash
-# Clone the repository
 git clone https://github.com/fabricioguidine/mosaic-pixel-matrixator.git
 cd mosaic-pixel-matrixator
 
-# Install dependencies
+python -m venv .venv
+source .venv/bin/activate
+
 pip install -r requirements.txt
+```
+
+### Windows (PowerShell)
+
+```powershell
+git clone https://github.com/fabricioguidine/mosaic-pixel-matrixator.git
+cd mosaic-pixel-matrixator
+
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+pip install -r requirements.txt
+```
+
+To install the development and test tooling as well:
+
+```bash
+pip install -r requirements-dev.txt
 ```
 
 ## 🎯 Quick Start
@@ -292,15 +318,36 @@ mosaic-pixel-matrixator/
 ## 🧪 Testing
 
 ```bash
-# Run all tests
-python -m pytest tests/
+# Run all tests (coverage is configured by default in pyproject.toml)
+python -m pytest
 
-# Run specific test file
+# Run a specific test file
 python -m pytest tests/test_color_quantizer.py
 
-# Run with coverage
-pytest --cov=src tests/
+# Run only the end-to-end CLI tests
+python -m pytest tests/test_cli_e2e.py
 ```
+
+The suite includes **end-to-end tests** (`tests/test_cli_e2e.py`) that generate a
+tiny image with Pillow in a temporary directory, invoke `main.py` as a real
+subprocess using the active interpreter, and assert on the generated preview PNG
+and JSON/TXT artifacts. They are hermetic and run identically on every OS.
+
+## 🌍 Cross-Platform Support
+
+This project is built to behave identically on Linux, macOS, and Windows:
+
+- **Paths**: all filesystem access uses `pathlib.Path`; no separators are
+  hardcoded and output directories are created with `mkdir(parents=True)`.
+- **Text I/O**: every text file is read and written with `encoding="utf-8"`,
+  so artifacts are byte-for-byte identical regardless of the OS default codec.
+- **Console output**: the CLI reconfigures `stdout`/`stderr` to UTF-8 at startup
+  (a no-op where unsupported), preventing `UnicodeEncodeError` on legacy Windows
+  code pages.
+- **Line endings**: `.gitattributes` enforces `eol=lf` for text and marks image
+  formats as binary.
+- **CI**: GitHub Actions runs the full test suite on a
+  `ubuntu / macOS / windows` × `Python 3.11 / 3.12 / 3.13` matrix.
 
 ## 📚 Architecture
 
@@ -326,7 +373,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed documentation.
 
 ### Import errors
 - Ensure all dependencies are installed: `pip install -r requirements.txt`
-- Check that you're using Python 3.8 or higher
+- Check that you're using Python 3.11 or higher
 
 ## 🤝 Contributing
 

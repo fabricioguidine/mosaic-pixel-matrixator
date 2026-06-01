@@ -12,6 +12,18 @@ from src.io import get_image_files, load_image, save_matrix_to_file, save_matrix
 from src.visualization import recreate_image_from_matrix
 
 
+def _configure_utf8_output() -> None:
+    """Force UTF-8 on stdout/stderr so output is identical across platforms.
+
+    Windows consoles default to a legacy code page (e.g. cp1252) which raises
+    UnicodeEncodeError on non-ASCII output; reconfigure is a no-op elsewhere.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8")
+
+
 def get_user_input(
     width_cm: float = None,
     height_cm: float = None,
@@ -76,6 +88,7 @@ def main():
     5. Saves outputs (TXT, JSON, PNG preview)
     6. Displays processing results
     """
+    _configure_utf8_output()
     parser = argparse.ArgumentParser(
         description='Mosaic Pixel Matrixator - Convert images to ceramic tile color matrices'
     )
@@ -218,7 +231,7 @@ def main():
             "total_tiles": paint_inventory.get_total_tiles(),
             "required_paints": required_paints
         }
-        with open(paints_output, 'w') as f:
+        with open(paints_output, 'w', encoding='utf-8') as f:
             json.dump(paint_data, f, indent=2)
         print(f"Paint colors saved to: {paints_output}")
 

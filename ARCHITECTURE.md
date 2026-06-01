@@ -243,6 +243,33 @@ The architecture allows for easy extensions:
 - **Pillow (PIL)**: Image loading, resizing, and format conversion
 - **NumPy**: Matrix operations and array handling
 
+## Cross-Platform Strategy
+
+The tool targets Linux, macOS, and Windows with identical behavior. The design
+choices that make this possible:
+
+1. **Path handling**: All filesystem paths go through `pathlib.Path`. Directory
+   scanning (`image_loader.get_image_files`) uses `Path.iterdir()` and suffix
+   matching; output paths are composed with the `/` operator and created via
+   `Path.mkdir(parents=True, exist_ok=True)`. No OS-specific separators or
+   absolute roots (`/tmp`, `C:\`, ...) are hardcoded.
+2. **Text encoding**: Every text artifact (TXT matrix, JSON matrix, paints JSON)
+   is opened with `encoding="utf-8"` in `io/file_handler.py` and `main.py`. This
+   removes the dependency on the platform's default codec (UTF-8 on Linux/macOS,
+   often cp1252 on Windows), guaranteeing identical files everywhere.
+3. **Console output**: `main.py` calls `_configure_utf8_output()` at startup,
+   which reconfigures `stdout`/`stderr` to UTF-8 when the stream supports it.
+   This is a no-op on already-UTF-8 streams and prevents `UnicodeEncodeError`
+   on legacy Windows consoles.
+4. **Working directory contract**: The CLI reads from `input/` and writes to
+   `output/` relative to the current working directory. These are resolved with
+   `pathlib` and created on demand, so the tool works from any directory.
+5. **Image I/O**: Pillow abstracts platform image codecs; matrices are handled
+   as NumPy arrays, both of which are platform-agnostic.
+
+These invariants are enforced by the CI matrix
+(`ubuntu / macOS / windows` × `Python 3.11 / 3.12 / 3.13`).
+
 ## Testing Strategy
 
 Each module can be tested independently:
@@ -250,6 +277,12 @@ Each module can be tested independently:
 - `processing/`: Test transformations with sample images
 - `generation/`: Test dimension calculations with known inputs
 - `visualization/`: Test preview generation with sample matrices
+
+In addition, **end-to-end tests** in `tests/test_cli_e2e.py` exercise the full
+pipeline through the real CLI: they create a tiny Pillow image in a temporary
+directory, run `main.py` as a subprocess via `sys.executable`, and assert on the
+generated preview PNG dimensions/mode and the JSON/TXT output structure. These
+tests are hermetic (no shared state, no network) and OS-agnostic.
 
 ## Performance Considerations
 

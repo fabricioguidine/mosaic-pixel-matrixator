@@ -34,7 +34,7 @@ class TestFileHandler(unittest.TestCase):
 
         self.assertTrue(output_path.exists())
 
-        content = output_path.read_text()
+        content = output_path.read_text(encoding='utf-8')
         self.assertIn('RGB Color Matrix with Paint Mixing Instructions', content)
         self.assertIn('2 rows x 2 columns', content)
         self.assertIn('255,128,64', content)
@@ -52,7 +52,7 @@ class TestFileHandler(unittest.TestCase):
 
         self.assertTrue(output_path.exists())
 
-        with open(output_path) as f:
+        with open(output_path, encoding='utf-8') as f:
             data = json.load(f)
 
         self.assertEqual(data['dimensions']['rows'], 2)
@@ -90,7 +90,7 @@ class TestFileHandler(unittest.TestCase):
         save_matrix_to_file(self.test_matrix, str(output_path), paint_inventory=paint_inventory)
 
         self.assertTrue(output_path.exists())
-        content = output_path.read_text()
+        content = output_path.read_text(encoding='utf-8')
         # Verify tile count information is present
         self.assertIn('TILES TO PAINT', content)
         self.assertIn('Total tiles', content)
@@ -99,7 +99,7 @@ class TestFileHandler(unittest.TestCase):
         json_path = Path(self.test_dir) / 'test_matrix.json'
         save_matrix_to_json(self.test_matrix, str(json_path), paint_inventory=paint_inventory)
 
-        with open(json_path) as f:
+        with open(json_path, encoding='utf-8') as f:
             data = json.load(f)
 
         self.assertIn('total_tiles', data)

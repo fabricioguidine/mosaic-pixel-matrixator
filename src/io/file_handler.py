@@ -40,7 +40,7 @@ def save_matrix_to_file(
     required_paints = paint_inventory.get_required_paints()
     total_tiles = paint_inventory.get_total_tiles()
 
-    with open(output_file, 'w') as f:
+    with open(output_file, 'w', encoding='utf-8') as f:
         f.write("# RGB Color Matrix with Paint Mixing Instructions\n")
         f.write(f"# Matrix dimensions: {matrix.shape[0]} rows x {matrix.shape[1]} columns\n")
         f.write(f"# Total tiles: {total_tiles}\n")
@@ -150,6 +150,6 @@ def save_matrix_to_json(
         "matrix": matrix_list
     }
 
-    with open(output_file, 'w') as f:
+    with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
 
