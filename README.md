@@ -2,15 +2,7 @@
 
 <img src=".github/assets/banner.svg" alt="mosaic-pixel-matrixator" width="100%" />
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-
-[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
-
-[![CI](https://github.com/fabricioguidine/mosaic-pixel-matrixator/actions/workflows/ci.yml/badge.svg)](https://github.com/fabricioguidine/mosaic-pixel-matrixator/actions/workflows/ci.yml)
-
-[![codecov](https://codecov.io/gh/fabricioguidine/mosaic-pixel-matrixator/branch/main/graph/badge.svg)](https://codecov.io/gh/fabricioguidine/mosaic-pixel-matrixator)
-
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE) [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/) [![CI](https://github.com/fabricioguidine/mosaic-pixel-matrixator/actions/workflows/ci.yml/badge.svg)](https://github.com/fabricioguidine/mosaic-pixel-matrixator/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/fabricioguidine/mosaic-pixel-matrixator/branch/main/graph/badge.svg)](https://codecov.io/gh/fabricioguidine/mosaic-pixel-matrixator) [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 </div>
 
