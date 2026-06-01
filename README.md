@@ -1,150 +1,145 @@
-# Mosaic Pixel Matrixator
+<div align="center">
 
-![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Status](https://img.shields.io/badge/status-active-success.svg)
+<img src=".github/assets/banner.svg" alt="mosaic-pixel-matrixator" width="100%" />
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
+
 [![CI](https://github.com/fabricioguidine/mosaic-pixel-matrixator/actions/workflows/ci.yml/badge.svg)](https://github.com/fabricioguidine/mosaic-pixel-matrixator/actions/workflows/ci.yml)
+
 [![codecov](https://codecov.io/gh/fabricioguidine/mosaic-pixel-matrixator/branch/main/graph/badge.svg)](https://codecov.io/gh/fabricioguidine/mosaic-pixel-matrixator)
+
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 
-> Convert images into ceramic tile color matrices with paint mixing instructions.
+</div>
 
-A Python tool that transforms images into ceramic tile mosaics by generating RGB color matrices with primary color mix percentages. Perfect for artists and craftspeople who want to create pixel art mosaics from images.
+> Transforms images into ceramic tile mosaics using color quantization and CMYK paint mixing instructions.
 
-## 🚀 Features
+A Python tool that converts a source image into a grid of ceramic tiles. It resizes the image to a tile matrix (while preserving aspect ratio), reduces the palette with a median cut quantizer, and emits both a visual preview and machine-readable matrices that tell you exactly which colors to paint each tile and how to mix them from the CMYK + white base set.
 
-- **📸 Image Processing**: Supports common formats (JPG, PNG, BMP, GIF, TIFF, WEBP)
-- **📐 Aspect Ratio Preservation**: Automatically maintains image proportions
-- **🎨 High-Quality Quantization**: Median cut algorithm for optimized color reduction
-- **🎨 Industry-Standard Colors**: CMYK (paint/printing) and Hex codes for color matching
-- **🎨 Minimum Color Purchase**: Only 5 base colors needed (Cyan, Magenta, Yellow, Black, White)
-- **🎨 Paint Mixing Instructions**: Each pixel shows how to mix base colors to achieve the desired color
-- **📦 Paint Inventory**: Lists all required paint colors with usage counts
-- **📊 Multiple Outputs**: TXT, JSON matrices + PNG preview + paint inventory
-- **⚙️ Configurable**: Custom tile size and color palette options
+## Table of Contents
 
-## 📋 Requirements
+- [Features](#features)
+- [How it works](#how-it-works)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Output](#output)
+- [Examples](#examples)
+- [Project structure](#project-structure)
+- [Testing](#testing)
+- [License](#license)
 
-- Python 3.8 or higher
+## Features
+
+- Reads the first image found in `input/` (JPG, JPEG, PNG, BMP, GIF, TIFF, WEBP).
+- Preserves aspect ratio by choosing the output dimensions closest to the requested width/height.
+- Splits the canvas into a tile matrix based on a configurable tile size (default 2.2 cm).
+- Reduces the palette with a median cut quantizer (default 32 colors), or keeps original colors with `--no-quantize`.
+- Computes CMYK, Hex and HSL values for every color plus per-tile mixing instructions from the 5 base paints (Cyan, Magenta, Yellow, Black, White).
+- Tracks a paint inventory: unique colors, per-color tile counts and percentages.
+- Writes four outputs per run: a PNG preview, a human-readable TXT matrix, a JSON matrix, and a paint-inventory JSON.
+
+## How it works
+
+```mermaid
+flowchart TD
+    A[Image in input/] --> B[Load first image]
+    B --> C[Preserve aspect ratio<br/>closest to requested W x H]
+    C --> D[Compute matrix dims<br/>dimension / tile size]
+    D --> E[Resize image to rows x cols]
+    E --> F{Quantize colors?}
+    F -- yes --> G[Median cut quantization<br/>num-colors palette]
+    F -- no --> H[Keep original colors]
+    G --> I[Color matrix RGB]
+    H --> I
+    I --> J[Per-tile CMYK mixing<br/>from C/M/Y/K + White base]
+    J --> K[Paint inventory<br/>counts and percentages]
+    K --> L[Outputs: PNG preview,<br/>TXT + JSON matrix, paints.json]
+```
+
+Pipeline detail:
+
+1. Loads the first image found in the `input/` directory.
+2. Calculates output dimensions that preserve the image's aspect ratio, picking the option closest to the requested width and height.
+3. Derives the matrix size in tiles (`dimension / tile size`).
+4. Resizes the image to that tile grid.
+5. Quantizes the palette with median cut (unless `--no-quantize` is set).
+6. Converts each tile color to CMYK and computes mixing percentages from the base paints (Cyan, Magenta, Yellow, Black, White).
+7. Builds a paint inventory of unique colors with tile counts and percentages.
+8. Writes the preview PNG and the TXT / JSON matrices plus the paints inventory to `output/`.
+
+## Requirements
+
+- Python 3.10 or higher
 - Pillow >= 10.0.0
 - NumPy >= 1.24.0
 
-## 📦 Installation
+## Installation
 
-```bash
-# Clone the repository
+```powershell
 git clone https://github.com/fabricioguidine/mosaic-pixel-matrixator.git
 cd mosaic-pixel-matrixator
-
-# Install dependencies
 pip install -r requirements.txt
 ```
 
-## 🎯 Quick Start
+For development (tests, linting, type-checking):
 
-1. **Place your image** in the `input/` folder
-
-2. **Run the script**:
-   ```bash
-   python main.py --width 200 --height 150
-   ```
-
-3. **Get results** in the `output/` folder:
-   - `{name}-{timestamp}.png` - Visual preview
-   - `{name}-{timestamp}_matrix.txt` - Human-readable matrix
-   - `{name}-{timestamp}_matrix.json` - JSON format
-   - `{name}-{timestamp}_paints.json` - Paint color inventory
-
-## 📖 Usage Examples
-
-### Interactive Mode
-
-```bash
-python main.py
-# Enter dimensions when prompted
+```powershell
+pip install -e ".[dev]"
 ```
 
-### Command-Line Options
+## Usage
 
-```bash
-# Basic usage
+Place an image in the `input/` folder, then run `main.py`. If `--width` and `--height` are omitted, the tool prompts for them interactively.
+
+```powershell
+# Interactive: prompts for width, height and tile size
+python main.py
+
+# Provide dimensions directly (centimeters)
 python main.py --width 200 --height 150
 
 # Custom tile size
 python main.py --width 200 --height 150 --tile-size 2.5
 
-# Custom color palette
+# Larger palette
 python main.py --width 200 --height 150 --num-colors 128
 
-# Disable quantization (use original colors)
+# Skip quantization (use original colors)
 python main.py --width 200 --height 150 --no-quantize
 ```
 
-### Options Reference
-
 | Option | Description | Default |
 |--------|-------------|---------|
-| `--width` | Maximum width in centimeters | Prompted |
-| `--height` | Maximum height in centimeters | Prompted |
-| `--tile-size` | Tile size in centimeters | 2.2cm |
-| `--num-colors` | Number of colors in palette | 64 |
-| `--no-quantize` | Disable color quantization | False |
+| `--width` | Output width in centimeters | Prompted |
+| `--height` | Output height in centimeters | Prompted |
+| `--tile-size` | Tile size in centimeters | `2.2` |
+| `--num-colors` | Colors in the quantized palette | `32` |
+| `--no-quantize` | Disable quantization, keep original colors | `False` |
 
-## 🖼️ Example Results
+Only the first image in `input/` is processed per run. Supported formats: JPG, JPEG, PNG, BMP, GIF, TIFF, WEBP.
 
-### Original Input Image
+## Output
 
-![Input Image](https://github.com/fabricioguidine/mosaic-pixel-matrixator/blob/main/examples/images/input-example.png?raw=true)
+Each run writes four files to `output/`, named `{image}-{timestamp}`:
 
-**Artwork Attribution:**
-- **Artist**: Nanzita (Nanzita Ladeira Salgado Alvim Gomes, 1919-2007)
-- **Title**: São Francisco de Assis com seus companheiros
-- **Technique**: Técnica mista sobre tela (Mixed media on canvas)
-- **Year**: 1986
-- **Location**: Cataguases, MG, Brazil
+- `{image}-{timestamp}.png` — visual preview of the mosaic (tiles scaled up 10x).
+- `{image}-{timestamp}_matrix.txt` — human-readable matrix with base colors to purchase, a tiles-to-paint summary, and per-tile mixing instructions.
+- `{image}-{timestamp}_matrix.json` — the same matrix as JSON, including `dimensions`, `total_tiles`, `total_unique_colors`, a `tiles_to_paint` summary, and the full `matrix` with RGB/Hex/CMYK/HSL per tile.
+- `{image}-{timestamp}_paints.json` — paint inventory: unique color count, total tiles, and `required_paints` with RGB/Hex/CMYK/HSL and usage counts.
 
-### Processed Output
+Every color carries four representations:
 
-![Output Example](examples/images/output-example.png)
+- **RGB** — digital values (0-255).
+- **Hex** — universal color reference (e.g. `#FFFFFF`).
+- **CMYK** — percentages used for paint mixing.
+- **HSL** — hue/saturation/lightness for intuitive description.
 
-**Example Processing Results:**
-- **Dimensions**: 68 rows × 43 columns (2,924 tiles total)
-- **Output Size**: 95.79cm × 150.00cm (aspect ratio preserved)
-- **Color Quantization**: Median cut algorithm (32 unique colors)
-- **Base Colors to Purchase**: 5 (Cyan, Magenta, Yellow, Black, White)
-- **Mixing Instructions**: Each tile shows exact percentages to mix base colors
-- **Paint Inventory**: All colors tracked with CMYK, Hex, HSL and usage counts
+The console also prints a per-color table (Hex, RGB, CMYK, tile count, percentage) and the set of base colors to purchase.
 
-## 🔧 How It Works
-
-1. **Image Loading**: Loads image from `input/` folder
-2. **Aspect Ratio Calculation**: Calculates and preserves aspect ratio
-3. **Dimension Calculation**: Chooses closest match to requested dimensions
-4. **Matrix Size Calculation**: Calculates tiles needed (dimensions ÷ tile size)
-5. **Image Resizing**: Resizes to matrix dimensions
-6. **Color Quantization**: Uses median cut algorithm to create optimized palette
-7. **Base Color Selection**: Identifies minimum colors to purchase (5 CMYK primaries + white)
-8. **Mixing Instructions**: Calculates how to mix base colors for each pixel
-9. **Paint Inventory**: Tracks all unique colors with usage counts
-10. **File Output**: Saves matrix in TXT and JSON formats with mixing instructions
-11. **Preview Generation**: Creates visual preview image
-
-### Key Rules
-
-- **Aspect Ratio**: Always preserved (no distortion)
-- **Closest Match**: Dimensions use closest match algorithm
-- **Minimum Colors**: Only 5 base colors needed (CMYK + White) - all other colors can be mixed
-- **Industry Standards**: Each color shows CMYK (for paint mixing) and Hex (for reference)
-- **Mixing Instructions**: Each pixel shows exact percentages of base colors to mix
-- **Tile Size**: Default 2.2cm, customizable via `--tile-size`
-- **Color Quantization**: Default 32 colors using median cut
-
-## 📄 Output Formats
-
-### Text Matrix (`{name}-{timestamp}_matrix.txt`)
-
-Includes base colors to purchase, tile count summary for assembly, and mixing instructions for each pixel:
+Sample TXT header:
 
 ```
 # RGB Color Matrix with Paint Mixing Instructions
@@ -158,189 +153,59 @@ Includes base colors to purchase, tile count summary for assembly, and mixing in
 # - YELLOW: RGB[255, 255, 0] #FFFF00 CMYK(0.0%,0.0%,100.0%,0.0%)
 # - BLACK: RGB[0, 0, 0] #000000 CMYK(0.0%,0.0%,0.0%,100.0%)
 # - WHITE: RGB[255, 255, 255] #FFFFFF CMYK(0.0%,0.0%,0.0%,0.0%)
-
-# ============================================================================
-# TILES TO PAINT - SUMMARY FOR ASSEMBLY
-# ============================================================================
-# Total unique colors: 32
-# Total tiles to paint: 2924
-#
-# Color (Hex)     | RGB          | CMYK                    | Tiles | %
-# ----------------------------------------------------------------------------
-# #FFFFFF         | (255,255,255) | C:0.0% M:0.0% Y:0.0% K:0.0% | 450   | 15.39%
-# #18122C         | (24,18,44)    | C:45.5% M:59.1% Y:0.0% K:82.7% | 320  | 10.94%
-# ...
-
-# MATRIX DATA (Row by Row)
-# ============================================================================
-# Row 1
-24,18,44[C:45.5%,M:59.1%,Y:0.0%,K:82.7%] #18122C {Mix: 24.3% cyan, 31.6% magenta, 44.2% black} ...
 ```
 
-**Tile Count Summary:** The file includes a "TILES TO PAINT" section at the top showing exactly how many tiles of each color you need to paint. This makes it easy to prepare all tiles before assembly.
+## Examples
 
-### JSON Matrix (`{name}-{timestamp}_matrix.json`)
+### Input
 
-```json
-{
-  "dimensions": {
-    "rows": 68,
-    "columns": 43
-  },
-  "total_tiles": 2924,
-  "total_unique_colors": 32,
-  "tiles_to_paint": [
-    {
-      "rgb": [255, 255, 255],
-      "hex": "#FFFFFF",
-      "cmyk": {
-        "c": 0.0,
-        "m": 0.0,
-        "y": 0.0,
-        "k": 0.0
-      },
-      "hsl": {
-        "h": 0.0,
-        "s": 0.0,
-        "l": 100.0
-      },
-      "tile_count": 450,
-      "percentage": 15.39
-    }
-  ],
-  "matrix": [
-    [
-      {
-        "rgb": [109, 73, 77],
-        "hex": "#6D494D",
-        "cmyk": {
-          "c": 0.0,
-          "m": 32.9,
-          "y": 29.4,
-          "k": 57.3
-        },
-        "hsl": {
-          "h": 353.3,
-          "s": 19.8,
-          "l": 35.7
-        }
-      }
-    ]
-  ]
-}
-```
+![Input example](https://github.com/fabricioguidine/mosaic-pixel-matrixator/blob/main/examples/images/input-example.png?raw=true)
 
-**Tile Count Information:** The JSON includes `tiles_to_paint` array with `tile_count` and `percentage` for each color, making it easy to programmatically process tile requirements.
+Artwork: *São Francisco de Assis com seus companheiros* (1986), mixed media on canvas, by Nanzita (Nanzita Ladeira Salgado Alvim Gomes, 1919-2007), Cataguases, MG, Brazil.
 
-### Paint Colors (`{name}-{timestamp}_paints.json`)
+### Output
 
-```json
-{
-  "total_unique_colors": 32,
-  "total_tiles": 2924,
-  "required_paints": [
-    {
-      "rgb": [255, 255, 255],
-      "hex": "#FFFFFF",
-      "cmyk": {
-        "c": 0.0,
-        "m": 0.0,
-        "y": 0.0,
-        "k": 0.0
-      },
-      "hsl": {
-        "h": 0.0,
-        "s": 0.0,
-        "l": 100.0
-      },
-      "count": 450
-    }
-  ]
-}
-```
+![Output example](examples/images/output-example.png)
 
-**Color System Explanation:**
-- **RGB**: Digital color values (0-255) - standard for screens/displays
-- **Hex**: Hexadecimal color code (e.g., `#FFFFFF` for white) - universal color reference
-- **CMYK**: Cyan, Magenta, Yellow, Black percentages (0-100%) - **industry standard for paint/printing**
-  - Use CMYK values to mix paint colors or purchase from paint suppliers
-  - Each percentage tells you how much of each primary paint color to mix
-- **HSL**: Hue, Saturation, Lightness - intuitive color description
+This sample run produced:
 
-**For Paint Purchasing:**
-Use the **CMYK values** or **Hex codes** when ordering from paint suppliers. Most paint stores can match colors using these industry-standard codes.
+- 68 rows x 43 columns (2,924 tiles)
+- 95.79 cm x 150.00 cm output (aspect ratio preserved)
+- 32 unique colors via median cut quantization
+- 5 base colors to purchase (Cyan, Magenta, Yellow, Black, White)
 
-## 🏗️ Project Structure
+## Project structure
 
 ```
 mosaic-pixel-matrixator/
-├── input/           # Input images folder
-├── output/          # Generated matrices and previews
-├── examples/        # Example images for documentation
-├── tests/           # Unit tests
+├── main.py              # CLI entry point
+├── input/               # Source images (first one is processed)
+├── output/              # Generated previews and matrices
+├── examples/images/     # Sample input/output for docs
 ├── src/
-│   ├── config/      # Configuration constants
-│   ├── io/          # File I/O operations
-│   ├── processing/  # Image processing
-│   ├── generation/  # Matrix generation
-│   ├── quantization/ # Color quantization & paint management
-│   └── visualization/ # Preview generation
-├── main.py          # CLI entry point
-└── requirements.txt # Dependencies
+│   ├── config/          # Constants (tile size, supported formats)
+│   ├── io/              # Image loading, matrix file output
+│   ├── processing/      # Image resize/convert
+│   ├── generation/      # Matrix dimensions and generation
+│   ├── quantization/    # Median cut, CMYK/HSL, paint inventory
+│   └── visualization/   # Preview image recreation
+├── tests/               # Pytest suite + fixtures
+├── pyproject.toml
+└── requirements.txt
 ```
 
-## 🧪 Testing
+See [ARCHITECTURE.md](ARCHITECTURE.md) for module-level detail.
 
-```bash
-# Run all tests
-python -m pytest tests/
+## Testing
 
-# Run specific test file
+```powershell
+# Run the suite with coverage (configured in pyproject.toml)
+pytest
+
+# A single test file
 python -m pytest tests/test_color_quantizer.py
-
-# Run with coverage
-pytest --cov=src tests/
 ```
 
-## 📚 Architecture
+## License
 
-Clean modular architecture with separation of concerns:
-- **`config/`**: Constants (tile size, supported formats)
-- **`io/`**: File operations (load images, save matrices)
-- **`processing/`**: Image transformations (resize, convert)
-- **`generation/`**: Matrix creation (dimensions, aspect ratio)
-- **`quantization/`**: Color reduction & paint inventory
-- **`visualization/`**: Preview image generation
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed documentation.
-
-## 🐛 Troubleshooting
-
-### No image files found
-- Ensure your image is in the `input/` folder
-- Check that the file format is supported
-
-### Dimensions seem incorrect
-- The tool preserves aspect ratio, so actual dimensions may differ
-- Check the output message for actual dimensions used
-
-### Import errors
-- Ensure all dependencies are installed: `pip install -r requirements.txt`
-- Check that you're using Python 3.8 or higher
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🙏 Acknowledgments
-
-- Original artwork by Nanzita (1919-2007)
-- Median cut quantization algorithm for high-quality color reduction
-
----
-
-Made with ❤️ for artists and crafters
+Licensed under the [MIT License](LICENSE).
