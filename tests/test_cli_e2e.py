@@ -8,6 +8,9 @@ These are hermetic and OS-agnostic:
   writes to ``output/`` relative to the working directory; no global state or
   hardcoded paths are touched.
 - Outputs are asserted to exist with the expected image/JSON properties.
+
+A square input image is used so aspect-ratio preservation resolves to clean,
+predictable tile dimensions on every platform.
 """
 
 from __future__ import annotations
@@ -17,21 +20,20 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
 from PIL import Image
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MAIN = REPO_ROOT / "main.py"
+SIZE = 8  # square -> aspect ratio 1:1
 
 
-def _make_input_image(input_dir: Path, name: str = "tiny.png", size: tuple[int, int] = (8, 6)) -> Path:
-    """Create a small multi-color PNG so quantization has real work to do."""
+def _make_input_image(input_dir: Path, name: str = "tiny.png") -> Path:
+    """Create a small square multi-color PNG so quantization has real work."""
     input_dir.mkdir(parents=True, exist_ok=True)
-    img = Image.new("RGB", size)
+    img = Image.new("RGB", (SIZE, SIZE))
     px = img.load()
-    w, h = size
-    for x in range(w):
-        for y in range(h):
+    for x in range(SIZE):
+        for y in range(SIZE):
             px[x, y] = ((x * 32) % 256, (y * 40) % 256, ((x + y) * 16) % 256)
     path = input_dir / name
     img.save(path)
@@ -54,6 +56,7 @@ def _run_cli(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
 def test_cli_end_to_end_produces_all_outputs(tmp_path: Path) -> None:
     _make_input_image(tmp_path / "input")
 
+    # Square input + tile-size 2.0: width 20cm -> 10 cols, height 16cm -> 8 rows.
     result = _run_cli(tmp_path, "--width", "20", "--height", "16", "--tile-size", "2.0")
 
     assert result.returncode == 0, f"stderr:\n{result.stderr}\nstdout:\n{result.stdout}"
@@ -72,13 +75,12 @@ def test_cli_end_to_end_produces_all_outputs(tmp_path: Path) -> None:
     assert len(matrix_jsons) == 1
     assert len(paints_jsons) == 1
 
-    # Preview image is a valid, upscaled RGB PNG.
+    # Preview is a valid RGB PNG upscaled by the default scale factor (10).
+    # Matrix is (rows=8, cols=10); PIL size is (width=cols*10, height=rows*10).
     with Image.open(pngs[0]) as preview:
         assert preview.mode == "RGB"
-        # tile-size 2.0 over 20x16 cm -> 8 cols x 10 rows; scale_factor=10 default.
-        assert preview.size == (8 * 10, 10 * 10)
+        assert preview.size == (10 * 10, 8 * 10)
 
-    # Matrix JSON has the expected structure and dimensions.
     data = json.loads(matrix_jsons[0].read_text(encoding="utf-8"))
     assert data["dimensions"] == {"rows": 8, "columns": 10}
     assert data["total_tiles"] == 80
@@ -90,6 +92,7 @@ def test_cli_end_to_end_produces_all_outputs(tmp_path: Path) -> None:
 def test_cli_no_quantize_option(tmp_path: Path) -> None:
     _make_input_image(tmp_path / "input")
 
+    # Square input, 12x12cm at tile-size 2.0 -> 6x6 = 36 tiles.
     result = _run_cli(
         tmp_path, "--width", "12", "--height", "12", "--tile-size", "2.0", "--no-quantize"
     )
@@ -98,7 +101,7 @@ def test_cli_no_quantize_option(tmp_path: Path) -> None:
     paints = list((tmp_path / "output").glob("*_paints.json"))
     assert len(paints) == 1
     payload = json.loads(paints[0].read_text(encoding="utf-8"))
-    assert payload["total_tiles"] == 36  # 6x6 tiles
+    assert payload["total_tiles"] == 36
     assert payload["total_unique_colors"] >= 1
 
 
@@ -109,8 +112,10 @@ def test_cli_output_files_are_utf8(tmp_path: Path) -> None:
     result = _run_cli(tmp_path, "--width", "10", "--height", "10", "--tile-size", "2.0")
     assert result.returncode == 0, result.stderr
 
-    for text_file in (tmp_path / "output").glob("*_matrix.txt"):
-        # Will raise UnicodeDecodeError if a non-UTF-8 codec was used to write.
+    text_files = list((tmp_path / "output").glob("*_matrix.txt"))
+    assert text_files
+    for text_file in text_files:
+        # Raises UnicodeDecodeError if a non-UTF-8 codec was used to write.
         content = text_file.read_text(encoding="utf-8")
         assert "RGB Color Matrix" in content
 
