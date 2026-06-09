@@ -101,13 +101,6 @@ Each run writes four files to `output/`, named `{image}-{timestamp}`:
 | `{image}-{timestamp}_matrix.json` | The matrix as JSON: `dimensions`, `total_tiles`, `total_unique_colors`, a `tiles_to_paint` summary, and the full `matrix` with RGB/Hex/CMYK/HSL per tile. |
 | `{image}-{timestamp}_paints.json` | Paint inventory: `total_unique_colors`, `total_tiles`, and `required_paints` with RGB/Hex/CMYK/HSL and usage counts. |
 
-Every color carries four representations:
-
-- **RGB** — digital values (0-255).
-- **Hex** — universal color reference (e.g. `#FFFFFF`).
-- **CMYK** — percentages used for paint mixing.
-- **HSL** — hue/saturation/lightness for intuitive description.
-
 The console also prints a per-color table (Hex, RGB, CMYK, tile count, percentage) and the set of base colors to purchase.
 
 Sample TXT header:
@@ -128,7 +121,16 @@ Sample TXT header:
 
 ## Example
 
-<img src="https://github.com/fabricioguidine/mosaic-pixel-matrixator/blob/main/examples/images/output-example.png?raw=true" alt="Mosaic output example" width="100%" />
+<table width="100%">
+<tr>
+<th width="50%">Input</th>
+<th width="50%">Output</th>
+</tr>
+<tr>
+<td><img src="https://github.com/fabricioguidine/mosaic-pixel-matrixator/blob/main/examples/images/input-example.png?raw=true" alt="Source painting" width="100%" /></td>
+<td><img src="https://github.com/fabricioguidine/mosaic-pixel-matrixator/blob/main/examples/images/output-example.png?raw=true" alt="Mosaic output" width="100%" /></td>
+</tr>
+</table>
 
 This sample run produced:
 
