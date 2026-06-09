@@ -128,7 +128,7 @@ Sample TXT header:
 
 ## Example
 
-![Mosaic output example](examples/images/output-example.png)
+<img src="https://github.com/fabricioguidine/mosaic-pixel-matrixator/blob/main/examples/images/output-example.png?raw=true" alt="Mosaic output example" width="100%" />
 
 This sample run produced:
 
